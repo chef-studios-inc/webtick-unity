@@ -1,0 +1,23 @@
+{
+  "name": "com.chefstudios.webtick",
+  "version": "0.0.1",
+  "displayName": "WebTick",
+  "description": "WebTick package",
+  "unity": "2022.2",
+  "unityRelease": "5f1",
+  "dependencies": {
+    "com.unity.entities": "1.0.0-pre.15",
+    "com.unity.netcode": "1.0.0-pre.15",
+    "com.unity.physics": "1.0.0-pre.15"
+ },
+ "keywords": [
+    "entities",
+    "multiplayer",
+    "online"
+  ],
+  "author": {
+    "name": "Chef Studios"
+  }
+}
+
+
