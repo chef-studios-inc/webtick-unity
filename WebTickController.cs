@@ -44,8 +44,8 @@ namespace WebTick {
 
         private HashSet<World> createdInvokedWorlds = new HashSet<World>();
         private WaitForSeconds wait = new WaitForSeconds(0.25f);
-        private ClientSettings clientSettings;
-        private ServerSettings serverSettings;
+        private ClientSettings clientSettings = new ClientSettings();
+        private ServerSettings serverSettings = new ServerSettings();
 
         private void Awake() {
             if(instance != null) {
@@ -98,8 +98,6 @@ namespace WebTick {
         }
 
         private async void CreateWorlds(Mode mode) {
-            serverSettings = new ServerSettings();
-            clientSettings = new ClientSettings();
             if (mode.HasFlag(Mode.Client)) { 
                 var clientGo = new GameObject("Client");
                 var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
@@ -114,7 +112,9 @@ namespace WebTick {
                 healthServer.StartWithServerSettings(serverSettings);
             }
 
-            NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(new Transport.LiveKitDriverConstructor.ClientSettings { host = clientSettings.url, port = clientSettings.port }, new Transport.LiveKitDriverConstructor.ServerSettings { port = serverSettings.port });
+            NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(
+                new Transport.LiveKitDriverConstructor.ClientSettings { host = clientSettings.url, port = clientSettings.port },
+                new Transport.LiveKitDriverConstructor.ServerSettings { port = serverSettings.port });
 
             if (mode.HasFlag(Mode.Server)) {
                 Debug.Log("attemping to create server world");
@@ -148,6 +148,7 @@ namespace WebTick {
             }
 
             if(world.IsClient()) {
+                Debug.LogFormat("NEIL - Connecting {0}", clientSettings.url);
                 // TODO when we add livekit
                 //var client = clientGo.AddComponent<Client.WebTickClient>();
                 //await client.Connect(clientSettings.url, clientSettings.port, clientSettings.token, world);
