@@ -2,14 +2,11 @@
     "name": "WebTick.Transport",
     "rootNamespace": "",
     "references": [
-        "GUID:67d5a0a11e9222f4084ac633cdecad3e",
         "GUID:e0cd26848372d4e5c891c569017e11f1",
         "GUID:953adc2a6b8b4e3c8df5b728bcd546e9",
         "GUID:734d92eba21c94caba915361bd5ac177",
-        "GUID:f2d49d9fa7e7eb3418e39723a7d3b92f",
-        "GUID:de3a487c6f9af1f40b2f12371547f503",
-        "GUID:d63c76189593ac54a88abd1b27cffd2a",
-        "GUID:96e45680d73d0e344bf5fbd3ccbefc1d"
+        "GUID:11b92bfd7b1d96e419ec0f790d9c4614",
+        "GUID:f2d49d9fa7e7eb3418e39723a7d3b92f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

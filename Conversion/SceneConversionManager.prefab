@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6182693254279583202}
-  - component: {fileID: 7853301963252686987}
+  - component: {fileID: 3144935094710851589}
   m_Layer: 0
   m_Name: SceneConversionManager
   m_TagString: Untagged
@@ -30,9 +30,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7853301963252686987
+--- !u!114 &3144935094710851589
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,6 +41,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 2358088562301328579}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3afe4148b566acf4abccf6236414f4b1, type: 3}
+  m_Script: {fileID: 11500000, guid: 418c54d08eebf7d4baa4e5afcc251f4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

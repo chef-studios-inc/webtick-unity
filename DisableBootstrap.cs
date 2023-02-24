@@ -11,7 +11,6 @@ namespace WebTick
     {
         public override bool Initialize(string defaultWorldName)
         {
-            Debug.Log("DISABLE BOOTSTRAP");
             var defaultWorld = new World("Default");
             World.DefaultGameObjectInjectionWorld = defaultWorld;
             return true;

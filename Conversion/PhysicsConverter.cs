@@ -81,6 +81,7 @@ namespace WebTick.Conversion
         {
             var physicsShapeAuthoring = go.GetComponent<PhysicsShapeAuthoring>();
             var physicsBodyAuthoring = go.GetComponent<PhysicsBodyAuthoring>();
+            Debug.LogFormat("NEIL {0} - {1} - {2}", physicsShapeAuthoring, physicsBodyAuthoring, go);
             var isDynamic = physicsBodyAuthoring.MotionType == BodyMotionType.Dynamic;
             var transform = go.GetComponent<Transform>();
 
