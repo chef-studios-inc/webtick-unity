@@ -154,7 +154,7 @@ namespace WebTick {
                 //await client.Connect(clientSettings.url, clientSettings.port, clientSettings.token, world);
                 var nsdQuery = world.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
-                var endpoint = NetworkEndpoint.Parse(clientSettings.url, clientSettings.port);
+                var endpoint = NetworkEndpoint.Parse(clientSettings.url, 0).WithPort(clientSettings.port);
                 nsd.Connect(world.EntityManager, endpoint);
             }
         }
