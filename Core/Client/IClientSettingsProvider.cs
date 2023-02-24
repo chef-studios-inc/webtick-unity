@@ -8,6 +8,6 @@ namespace WebTick.Client
 {
     internal interface IClientSettingsProvider
     {
-        public Task<ClientSettings> GetClientSettings(World world);
+        public Task<ClientSettings> GetClientSettings();
     }
 }

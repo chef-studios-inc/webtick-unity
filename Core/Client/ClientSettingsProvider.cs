@@ -10,10 +10,9 @@ namespace WebTick.Client
 {
     public class ClientSettingsProvider : MonoBehaviour, IClientSettingsProvider
     {
-        public Task<ClientSettings> GetClientSettings(World world)
+        public Task<ClientSettings> GetClientSettings()
         {
             if(Application.isEditor) {
-                Debug.Log("is editor");
                 var url = "127.0.0.1";
                 // TODO when we get livekit
                 //var token = Livekit.Server.LivekitTokenGenerator.GenerateToken(world.Name, "prod", "123");

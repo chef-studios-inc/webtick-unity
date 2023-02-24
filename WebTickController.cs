@@ -44,6 +44,8 @@ namespace WebTick {
 
         private HashSet<World> createdInvokedWorlds = new HashSet<World>();
         private WaitForSeconds wait = new WaitForSeconds(0.25f);
+        private ClientSettings clientSettings;
+        private ServerSettings serverSettings;
 
         private void Awake() {
             if(instance != null) {
@@ -60,7 +62,6 @@ namespace WebTick {
 #endif
         }
 
-
         // Start is called before the first frame update
         void Start() {
 #if !UNITY_WEBGL || UNITY_EDITOR
@@ -68,6 +69,17 @@ namespace WebTick {
             // Unity.WebRTC.WebRTC.Initialize();
             // StartCoroutine(Unity.WebRTC.WebRTC.Update());
 #endif
+        }
+
+        private void OnDestroy() {
+#if !UNITY_WEBGL || UNITY_EDITOR
+            // TODO When we have livekit
+            // Unity.WebRTC.WebRTC.Dispose();
+#endif
+        }
+
+        public void CreateWorlds()
+        {
             if(Application.isEditor) {
                 CreateWorlds(Mode.Client);
                 CreateWorlds(Mode.Server);
@@ -85,17 +97,26 @@ namespace WebTick {
             StartCoroutine(NewThinClientLoop());
         }
 
-        private void OnDestroy() {
-#if !UNITY_WEBGL || UNITY_EDITOR
-            // TODO When we have livekit
-            // Unity.WebRTC.WebRTC.Dispose();
-#endif
-        }
+        private async void CreateWorlds(Mode mode) {
+            serverSettings = new ServerSettings();
+            clientSettings = new ClientSettings();
+            if (mode.HasFlag(Mode.Client)) { 
+                var clientGo = new GameObject("Client");
+                var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
+                clientSettings = await clientSettingsProvider.GetClientSettings();
+            }
+            if(mode.HasFlag(Mode.Server))
+            {
+                var serverGo = new GameObject("Server");
+                var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
+                serverSettings = await serverSettingsProvider.GetServerSettings();
+                var healthServer = serverGo.AddComponent<WebTick.Core.Server.HealthReporter.HealthServer>();
+                healthServer.StartWithServerSettings(serverSettings);
+            }
 
-        private void CreateWorlds(Mode mode) {
-            NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor();
+            NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(new Transport.LiveKitDriverConstructor.ClientSettings { host = clientSettings.url, port = clientSettings.port }, new Transport.LiveKitDriverConstructor.ServerSettings { port = serverSettings.port });
 
-            if(mode.HasFlag(Mode.Server)) {
+            if (mode.HasFlag(Mode.Server)) {
                 Debug.Log("attemping to create server world");
                 var serverWorld = ClientServerBootstrap.CreateServerWorld("Server");
                 InitializeWorld(serverWorld);
@@ -114,29 +135,19 @@ namespace WebTick {
             InitializeGhostPrefabs(world);
         }
 
-        public async void Connect(World world) {
+        public void Connect(World world) {
             if(world.IsServer()) {
-                Debug.Log("IS SERVER");
-                var serverGo = new GameObject(world.Name);
-                var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
-                var serverSettings = await serverSettingsProvider.GetServerSettings();
-                var healthServer = serverGo.AddComponent<WebTick.Core.Server.HealthReporter.HealthServer>();
-                healthServer.StartWithServerSettings(serverSettings);
-                // TODO when we add livekit
-                //var server = serverGo.AddComponent<Server.WebTickServer>();
-                //await server.Listen(serverSettings.url, serverSettings.port, serverSettings.udpPort, serverSettings.tcpPort, serverSettings.apiKey, serverSettings.apiSecret, world);
                 var nsdQuery = world.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
                 var endpoint = NetworkEndpoint.AnyIpv4.WithPort(serverSettings.port);
                 nsd.Listen(endpoint);
+                // TODO when we add livekit
+                //var server = serverGo.AddComponent<Server.WebTickServer>();
+                //await server.Listen(serverSettings.url, serverSettings.port, serverSettings.udpPort, serverSettings.tcpPort, serverSettings.apiKey, serverSettings.apiSecret, world);
+
             }
 
             if(world.IsClient()) {
-                Debug.Log("IS CLIENT");
-                var clientGo = new GameObject(world.Name);
-                var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
-                var clientSettings = await clientSettingsProvider.GetClientSettings(world);
-
                 // TODO when we add livekit
                 //var client = clientGo.AddComponent<Client.WebTickClient>();
                 //await client.Connect(clientSettings.url, clientSettings.port, clientSettings.token, world);
