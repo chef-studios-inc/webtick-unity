@@ -9,6 +9,7 @@ using Unity.NetCode.Hybrid;
 using Unity.Networking.Transport;
 using UnityEngine;
 using UnityEngine.Events;
+using WebTick.Core.Server.HealthReporter;
 
 namespace WebTick {
     [Flags]
@@ -46,6 +47,7 @@ namespace WebTick {
         private WaitForSeconds wait = new WaitForSeconds(0.25f);
         private ClientSettings clientSettings = new ClientSettings();
         private ServerSettings serverSettings = new ServerSettings();
+        private HealthServer healthServer = null;
 
         private void Awake() {
             if(instance != null) {
@@ -108,7 +110,7 @@ namespace WebTick {
                 var serverGo = new GameObject("Server");
                 var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
                 serverSettings = await serverSettingsProvider.GetServerSettings();
-                var healthServer = serverGo.AddComponent<WebTick.Core.Server.HealthReporter.HealthServer>();
+                healthServer = serverGo.AddComponent<HealthServer>();
                 healthServer.StartWithServerSettings(serverSettings);
             }
 
@@ -141,6 +143,7 @@ namespace WebTick {
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
                 var endpoint = NetworkEndpoint.AnyIpv4.WithPort(serverSettings.port);
                 nsd.Listen(endpoint);
+                healthServer.status = HealthInfo.Status.Running;
                 // TODO when we add livekit
                 //var server = serverGo.AddComponent<Server.WebTickServer>();
                 //await server.Listen(serverSettings.url, serverSettings.port, serverSettings.udpPort, serverSettings.tcpPort, serverSettings.apiKey, serverSettings.apiSecret, world);
@@ -148,7 +151,6 @@ namespace WebTick {
             }
 
             if(world.IsClient()) {
-                Debug.LogFormat("NEIL - Connecting {0}", clientSettings.url);
                 // TODO when we add livekit
                 //var client = clientGo.AddComponent<Client.WebTickClient>();
                 //await client.Connect(clientSettings.url, clientSettings.port, clientSettings.token, world);
