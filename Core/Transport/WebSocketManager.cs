@@ -21,6 +21,7 @@ namespace WebTick.Transport
         public ConcurrentQueue<Message> receiveQueue = new ConcurrentQueue<Message>();
         public bool isReady = false;
         public bool isError = false;
+        public bool isClosed = false;
         public string error = null; 
 
         public struct Message
@@ -58,6 +59,7 @@ namespace WebTick.Transport
         private void Ws_OnClose(NativeWebSocket.WebSocketCloseCode closeCode)
         {
             Debug.LogFormat("Ws On close: {0}", closeCode);
+            isClosed = true;
             throw new NotImplementedException();
         }
 

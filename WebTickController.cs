@@ -40,9 +40,15 @@ namespace WebTick {
 
         private HashSet<World> createdInvokedWorlds = new HashSet<World>();
         private WaitForSeconds wait = new WaitForSeconds(0.25f);
+
+        private LiveKitManager liveKitManager;
         private ClientSettings clientSettings = new ClientSettings();
+
+        private WebSocketManager wsManager;
         private ServerSettings serverSettings = new ServerSettings();
+
         private HealthServer healthServer = null;
+        private WaitForSeconds healthLoopWait = new WaitForSeconds(0.2f);
 
         private void Awake() {
             if(instance != null) {
@@ -95,16 +101,14 @@ namespace WebTick {
 
         private async void CreateWorlds(Mode mode) {
 
-            LiveKitManager lkManager = null;
-            WebSocketManager wsManager = null;
             if (mode.HasFlag(Mode.Client)) { 
                 var clientGo = new GameObject("Client");
                 var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
                 this.clientSettings = await clientSettingsProvider.GetClientSettings();
                 if (!Application.isEditor)
                 {
-                    lkManager = clientGo.AddComponent<LiveKitManager>();
-                    await lkManager.Connect(this.clientSettings.url, this.clientSettings.token);
+                    liveKitManager = clientGo.AddComponent<LiveKitManager>();
+                    await liveKitManager.Connect(this.clientSettings.url, this.clientSettings.token);
                 }
             }
             if (mode.HasFlag(Mode.Server))
@@ -126,7 +130,7 @@ namespace WebTick {
                 NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
             } else
             {
-                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, lkManager);
+                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager);
             }
 
             if (mode.HasFlag(Mode.Server)) {
@@ -166,6 +170,7 @@ namespace WebTick {
                     yield return null; 
                 }
                 healthServer.status = HealthInfo.Status.Running;
+                StartCoroutine(HealthCheckLoop());
             }
 
             if(world.IsClient()) {
@@ -210,6 +215,23 @@ namespace WebTick {
         private void InvokeCreatedWorld(World w) {
             createdInvokedWorlds.Add(w);
             onWorldCreated.Invoke(w);
+        }
+
+        private IEnumerator HealthCheckLoop()
+        {
+            while(true)
+            {
+                yield return healthLoopWait;
+                if(wsManager == null)
+                {
+                    continue;
+                }
+
+                if(wsManager.isError || wsManager.isClosed)
+                {
+                    healthServer.status = HealthInfo.Status.Failed;
+                }
+            }
         }
 
         private IEnumerator NewThinClientLoop() {
