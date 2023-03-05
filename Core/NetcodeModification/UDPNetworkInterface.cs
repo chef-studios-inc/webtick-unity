@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Networking.Transport;
 using UnityEngine;
 
+#if !UNITY_EDITOR
 public struct UDPNetworkInterface : INetworkInterface
 {
     public NetworkEndpoint LocalEndpoint => throw new System.NotImplementedException();
@@ -38,3 +39,4 @@ public struct UDPNetworkInterface : INetworkInterface
         throw new System.NotImplementedException();
     }
 }
+#endif

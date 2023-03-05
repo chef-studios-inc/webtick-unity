@@ -78,8 +78,7 @@ namespace WebTick {
         public void CreateWorlds()
         {
             if(Application.isEditor) {
-                //CreateWorlds(Mode.Client | Mode.Server);
-                CreateWorlds(Mode.Server);
+                CreateWorlds(Mode.Client | Mode.Server);
             }
             else {
                 var serverSettingsEnvironment = Environment.GetEnvironmentVariable("WEBTICK_SERVER_SETTINGS");
@@ -100,23 +99,35 @@ namespace WebTick {
             WebSocketManager wsManager = null;
             if (mode.HasFlag(Mode.Client)) { 
                 var clientGo = new GameObject("Client");
-                lkManager = clientGo.AddComponent<LiveKitManager>();
                 var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
                 this.clientSettings = await clientSettingsProvider.GetClientSettings();
-                await lkManager.Connect(this.clientSettings.url, this.clientSettings.token);
+                if (!Application.isEditor)
+                {
+                    lkManager = clientGo.AddComponent<LiveKitManager>();
+                    await lkManager.Connect(this.clientSettings.url, this.clientSettings.token);
+                }
             }
             if (mode.HasFlag(Mode.Server))
             {
                 var serverGo = new GameObject("Server");
-                wsManager = serverGo.AddComponent<WebSocketManager>();
                 var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
                 this.serverSettings = await serverSettingsProvider.GetServerSettings();
-                await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
+                if (!Application.isEditor)
+                {
+                    wsManager = serverGo.AddComponent<WebSocketManager>();
+                    await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
+                }
                 healthServer = serverGo.AddComponent<HealthServer>();
                 healthServer.StartWithServerSettings(this.serverSettings);
             }
 
-            NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, lkManager);
+            if(Application.isEditor)
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
+            } else
+            {
+                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, lkManager);
+            }
 
             if (mode.HasFlag(Mode.Server)) {
                 Debug.Log("attemping to create server world");
@@ -148,9 +159,9 @@ namespace WebTick {
             if(world.IsServer()) {
                 var nsdQuery = world.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
-                var endpoint = NetworkEndpoint.AnyIpv4.WithPort(0);
+                var endpoint = NetworkEndpoint.AnyIpv4.WithPort(7000);
                 nsd.Listen(endpoint);
-                while(!LiveKitServerNetworkInterface.Dependencies.websocketManager.isReady)
+                while(!LiveKitServerNetworkInterface.Dependencies.websocketManager.isReady && !Application.isEditor)
                 {
                     yield return null; 
                 }
@@ -160,7 +171,7 @@ namespace WebTick {
             if(world.IsClient()) {
                 var nsdQuery = world.EntityManager.CreateEntityQuery(typeof(NetworkStreamDriver));
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
-                var endpoint = NetworkEndpoint.AnyIpv4.WithPort(0);
+                var endpoint = NetworkEndpoint.LoopbackIpv4.WithPort(7000);
                 nsd.Connect(world.EntityManager, endpoint);
             }
 
