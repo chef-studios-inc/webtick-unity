@@ -1,4 +1,6 @@
+#if UNITY_WEBGL
 using LiveKit;
+#endif
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,6 +9,7 @@ using UnityEngine;
 
 namespace WebTick.Transport
 {
+#if UNITY_WEBGL
     public class LiveKitManager : MonoBehaviour
     {
         public ConcurrentQueue<byte[]> receiveQueue = new ConcurrentQueue<byte[]>();
@@ -38,7 +41,7 @@ namespace WebTick.Transport
             room.LocalParticipant.PublishData(msg, DataPacketKind.LOSSY, serverParticipant);
         }
 
-        public IEnumerator ConnectCoro(string url, string token, TaskCompletionSource<bool> tr)
+        private IEnumerator ConnectCoro(string url, string token, TaskCompletionSource<bool> tr)
         {
             var room = new Room();
             var c = room.Connect(url, token);
@@ -96,4 +99,22 @@ namespace WebTick.Transport
             receiveQueue.Enqueue(data);
         }
     }
+
+#else
+    public class LiveKitManager : MonoBehaviour
+    {
+        public ConcurrentQueue<byte[]> receiveQueue = new ConcurrentQueue<byte[]>();
+        public bool isReady = false;
+
+        public async Task Connect(string url, string token)
+        {
+            throw new System.NotImplementedException("only available in webgl build");
+        }
+
+        public void SendMessageToServer(byte[] msg)
+        {
+            throw new System.NotImplementedException("only available in webgl build");
+        }
+    }
+#endif
 }
