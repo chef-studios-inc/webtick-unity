@@ -12,7 +12,7 @@ namespace WebTick.Core.Server
         {
             if (Application.isEditor)
             {
-                return Task.FromResult(new ServerSettings { apiKey = "prod", apiSecret = "123", port = 7880, udpPort = 7881, tcpPort = 7882, statusPort=7883, room = "default", url = "ws://127.0.0.1" });
+                return Task.FromResult(new ServerSettings { ws_data_channel_proxy_url="ws://localhost:8080/ws/test", statusPort=7000 });
 
             }
             var serverSettingsString = Environment.GetEnvironmentVariable("WEBTICK_SERVER_SETTINGS");

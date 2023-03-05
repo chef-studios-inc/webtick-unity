@@ -9,8 +9,8 @@
     "com.unity.entities": "1.0.0-pre.15",
     "com.unity.netcode": "1.0.0-pre.15",
     "com.unity.physics": "1.0.0-pre.15"
- },
- "keywords": [
+  },
+  "keywords": [
     "entities",
     "multiplayer",
     "online"
@@ -19,5 +19,3 @@
     "name": "Chef Studios"
   }
 }
-
-

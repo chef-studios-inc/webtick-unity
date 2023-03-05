@@ -13,10 +13,8 @@ namespace WebTick.Client
         public Task<ClientSettings> GetClientSettings()
         {
             if(Application.isEditor) {
-                var url = "127.0.0.1";
-                // TODO when we get livekit
-                //var token = Livekit.Server.LivekitTokenGenerator.GenerateToken(world.Name, "prod", "123");
-                return Task.FromResult(new ClientSettings { token = "", url = url, port = 7880 });
+                var url = "127.0.0.1:7880";
+                return Task.FromResult(new ClientSettings { token = "", url = url });
             }
 
             var provider = FindObjectsOfType<MonoBehaviour>().OfType<ICustomClientSettingsProvider>();

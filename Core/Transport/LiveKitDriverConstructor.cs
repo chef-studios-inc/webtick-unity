@@ -1,55 +1,34 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Pipes;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
-using Unity.Networking.Transport;
-using Unity.Networking.Transport.TLS;
 using UnityEngine;
 
 namespace WebTick.Transport
 {
     public class LiveKitDriverConstructor : INetworkStreamDriverConstructor
     {
-        public struct ClientSettings
-        {
-            public string host;
-            public uint port;
-        }
-
-        public struct ServerSettings
-        {
-            public uint port; 
-        }
-
-        private ClientSettings clientSettings;
-        private ServerSettings serverSettings;
+        private WebSocketManager webSocketManager;
+        private LiveKitManager liveKitManager;
 
         private LiveKitDriverConstructor() { }
 
-        public LiveKitDriverConstructor(ClientSettings clientSettings, ServerSettings serverSettings) {
-            this.clientSettings = clientSettings;
-            this.serverSettings = serverSettings;
+        public LiveKitDriverConstructor(WebSocketManager wsManager, LiveKitManager liveKitManager) {
+            this.webSocketManager = wsManager;
+            this.liveKitManager = liveKitManager;
         }
 
         public void CreateClientDriver(World world, ref NetworkDriverStore driver, NetDebug netDebug)
         {
-            var networkSettings = new NetworkSettings();
-            if (clientSettings.host != null && (clientSettings.host.StartsWith("wss://") || clientSettings.host.StartsWith("https://")))
-            {
-                networkSettings = networkSettings.WithSecureClientParameters(clientSettings.host.Replace("wss://", "").Replace("https://", ""));
-            }
-            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new WebSocketNetworkInterface(), networkSettings);
-            // TODO when we have livekit working
-            // var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitNetworkInterface(LiveKitNetworkInterface.Mode.Client, world));
+            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitClientNetworkInterface(liveKitManager));
             driver.RegisterDriver(TransportType.Socket, driverInstance);
         }
 
         public void CreateServerDriver(World world, ref NetworkDriverStore driver, NetDebug netDebug)
         {
-            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new WebSocketNetworkInterface());
-            // TODO when we have livekit working
-            // var driverInstance = DefaultDriverBuilder.CreateServerNetworkDriver(new LiveKitNetworkInterface(LiveKitNetworkInterface.Mode.Server, world));
+            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitServerNetworkInterface(webSocketManager));
             driver.RegisterDriver(TransportType.Socket, driverInstance);
         }
     }
