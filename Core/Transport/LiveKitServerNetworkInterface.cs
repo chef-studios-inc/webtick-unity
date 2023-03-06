@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Networking.Transport;
 using System;
 using Unity.Entities;
-using System.Diagnostics;
+using UnityEngine;
 
 namespace WebTick.Transport
 {
@@ -56,8 +56,9 @@ namespace WebTick.Transport
             WebSocketManager.Message msg;
             while (Dependencies.websocketManager.receiveQueue.TryDequeue(out msg))
             {
-                var na = new NativeArray<byte>(msg.payload.Count, Allocator.TempJob);
-                na.CopyFrom(msg.payload.Array);
+                Debug.LogFormat("NEIL received message from: {0}", msg.sender);
+                var array = msg.payload.ToArray();
+                var na = new NativeArray<byte>(array, Allocator.TempJob);
                 var job = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = na, intSid = msg.sender }.Schedule(previousJob);
                 na.Dispose(job);
                 previousJob = job;
@@ -82,6 +83,7 @@ namespace WebTick.Transport
                 var nativeByteArray = new NativeArray<byte>(msg.Length + 4, Allocator.Temp);
                 msg.CopyPayload(nativeByteArray.GetUnsafePtr(), msg.Length);
                 var recipientSid = BitConverter.ToUInt32(msg.EndpointRef.GetRawAddressBytes());
+                Debug.LogFormat("NEIL sending message to: {0}", recipientSid);
                 Dependencies.websocketManager.SendMessage(nativeByteArray.ToArray(), recipientSid);
                 nativeByteArray.Dispose();
             }

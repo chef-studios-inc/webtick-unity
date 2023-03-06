@@ -1,6 +1,3 @@
-#if UNITY_WEBGL
-using LiveKit;
-#endif
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,90 +11,46 @@ namespace WebTick.Transport
     {
         public ConcurrentQueue<byte[]> receiveQueue = new ConcurrentQueue<byte[]>();
         public bool isReady = false;
-        private Room room;
-        private RemoteParticipant serverParticipant;
+        //private Room room;
+        //private RemoteParticipant serverParticipant;
+        private LiveKit.LiveKit liveKit;
+        private TaskCompletionSource<bool> connectedTask;
+
+        private void Start()
+        {
+            liveKit = gameObject.AddComponent<LiveKit.LiveKit>();
+            liveKit.onConnected.AddListener(OnConnected);
+        }
 
         public async Task Connect(string url, string token)
         {
-            var tr = new TaskCompletionSource<bool>();
-            StartCoroutine(ConnectCoro(url, token, tr));
-            await tr.Task;
+            Debug.Log("Connecting to livekit room");
+            liveKit.ConnectToRoom(url, token);
+            connectedTask = new TaskCompletionSource<bool>();
+            await connectedTask.Task;
+            Debug.Log("Connected to livekit room adsf");
         }
 
         public void SendMessageToServer(byte[] msg)
         {
-            if(room.State != ConnectionState.Connected)
-            {
-                Debug.LogError("Trying to send when room is closed");
-                return;
-            }
-
-            if(serverParticipant == null)
-            {
-                Debug.LogError("Trying to send when room no server participant");
-                return;
-            }
-
-            room.LocalParticipant.PublishData(msg, DataPacketKind.LOSSY, serverParticipant);
+            liveKit.SendMessageToServer(msg);
         }
 
-        private IEnumerator ConnectCoro(string url, string token, TaskCompletionSource<bool> tr)
+        private void OnConnected()
         {
-            var room = new Room();
-            var c = room.Connect(url, token);
-            yield return c;
-
-            if (c.IsError)
-            {
-                tr.SetException(new System.Exception(c.Error.Message));
-                yield break;
-            }
-
-            room.ParticipantConnected += Room_ParticipantConnected;
-            room.ParticipantDisconnected += Room_ParticipantDisconnected;
-            room.DataReceived += Room_DataReceived;
-
-            foreach(var p in room.Participants)
-            {
-                if(p.Value.Identity == "server")
-                {
-                    serverParticipant = p.Value;
-                }
-            }
-
-            while(serverParticipant == null)
-            {
-                Debug.Log("Waiting for server participant");
-                yield return null;
-            }
-            tr.SetResult(true);
+            Debug.Log("Connected to livekit room");
+            connectedTask.SetResult(true);
         }
 
-        private void Room_ParticipantDisconnected(RemoteParticipant participant)
-        {
-            if(participant.Identity == "server")
-            {
-                serverParticipant = null;
-            }
-        }
+        //private void Room_DataReceived(byte[] data, RemoteParticipant participant, DataPacketKind? kind)
+        //{
+        //    //if(participant.Identity != "server")
+        //    //{
+        //    //    return;
+        //    //}
 
-        private void Room_ParticipantConnected(RemoteParticipant participant)
-        {
-            if(participant.Identity == "server")
-            {
-                serverParticipant = participant;
-            }
-        }
-
-        private void Room_DataReceived(byte[] data, RemoteParticipant participant, DataPacketKind? kind)
-        {
-            if(participant.Identity != "server")
-            {
-                return;
-            }
-
-            receiveQueue.Enqueue(data);
-        }
+        //    //receiveQueue.Enqueue(data);
+        //}
     }
 
 #else

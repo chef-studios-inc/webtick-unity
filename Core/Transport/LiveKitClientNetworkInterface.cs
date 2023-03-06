@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Networking.Transport;
 using System;
 using Unity.Entities;
+using System.Diagnostics;
 
 namespace WebTick.Transport
 {
@@ -49,11 +50,13 @@ namespace WebTick.Transport
         public JobHandle ScheduleReceive(ref ReceiveJobArguments arguments, JobHandle dep)
         {
             JobHandle previousJob = dep;
-            while (Dependencies.livekitManager.receiveQueue.TryDequeue(out var bytes))
+            while (!Dependencies.livekitManager.receiveQueue.IsEmpty)
             {
+                UnityEngine.Debug.Log("Receive packet");
+                Dependencies.livekitManager.receiveQueue.TryDequeue(out var bytes);
                 var msg = new NativeArray<byte>(bytes.Length, Allocator.TempJob);
                 msg.CopyFrom(bytes);
-                var job = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg, intSid = 0 }.Schedule(previousJob);
+                var job = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
                 msg.Dispose(job);
                 previousJob = job;
             }
@@ -73,7 +76,7 @@ namespace WebTick.Transport
                     continue;
                 }
 
-                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.Temp);
+                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.TempJob);
                 msg.CopyPayload(nativeByteArray.GetUnsafePtr(), msg.Length);
                 Dependencies.livekitManager.SendMessageToServer(nativeByteArray.ToArray());
                 nativeByteArray.Dispose();
@@ -85,17 +88,13 @@ namespace WebTick.Transport
         struct ReceiveJob : IJob
         {
             public NativeArray<byte> message;
-            public uint intSid;
             public PacketsQueue receiveQueue;
 
             public unsafe void Execute()
             {
                 if (receiveQueue.EnqueuePacket(out var pp))
                 {
-                    var addressBytes = new NativeArray<byte>(BitConverter.GetBytes(intSid), Allocator.Temp);
-                    pp.EndpointRef.SetRawAddressBytes(addressBytes, NetworkFamily.Ipv4);
-                    pp.EndpointRef = pp.EndpointRef.WithPort(1234);
-                    addressBytes.Dispose();
+                    UnityEngine.Debug.LogFormat("Enqueing packet: {0}", message.Length);
                     pp.AppendToPayload(message.GetUnsafeReadOnlyPtr(), message.Length);
                 };
             }

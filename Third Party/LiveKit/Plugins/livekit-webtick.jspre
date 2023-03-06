@@ -1,0 +1,1 @@
+window.webtick = {livekitGameObject: "", room: null, serverParticipant: null};

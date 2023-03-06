@@ -1,4 +1,6 @@
+#if !UNITY_WEBGL
 using NativeWebSocket;
+#endif
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -14,6 +16,7 @@ using UnityEngine.XR;
 
 namespace WebTick.Transport
 {
+#if !UNITY_WEBGL
     public class WebSocketManager: MonoBehaviour 
     {
         private NativeWebSocket.WebSocket ws = null;
@@ -100,17 +103,16 @@ namespace WebTick.Transport
                 return;
             }
 
-            var totalPayload = new ArraySegment<byte>();
-            totalPayload.Concat(BitConverter.GetBytes(recipient));
-            totalPayload.Concat(payload);
-            await ws.Send(totalPayload.Array);
+            var array = new byte[4 + payload.Length]; ;
+            Buffer.BlockCopy(BitConverter.GetBytes(recipient), 0, array, 0, 4);
+            Buffer.BlockCopy(payload, 0, array, 4, payload.Length);
+            Debug.LogFormat("NEIL {0} + 4 = {1}", payload.Length, array.Length);
+            await ws.Send(array);
         }
 
         void Update()
         {
-#if !UNITY_WEBGL || UNITY_EDITOR
             ws.DispatchMessageQueue();
-#endif
         }
 
         private void OnDestroy()
@@ -124,4 +126,32 @@ namespace WebTick.Transport
         }
 
     }
+#else
+    public class WebSocketManager : MonoBehaviour
+    {
+        public ConcurrentQueue<Message> receiveQueue = new ConcurrentQueue<Message>();
+        public bool isReady = false;
+        public bool isError = false;
+        public bool isClosed = false;
+        public string error = null;
+
+        public struct Message
+        {
+            public uint sender;
+            public ArraySegment<byte> payload;
+        }
+
+        public async Task Connect(string url)
+        {
+            throw new System.NotImplementedException("only available in non webgl build");
+        }
+
+        public async void SendMessage(byte[] payload, uint recipient)
+        {
+            throw new System.NotImplementedException("only available in non webgl build");
+        }
+
+    }
+
+#endif
 }

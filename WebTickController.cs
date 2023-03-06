@@ -65,20 +65,7 @@ namespace WebTick {
 #endif
         }
 
-        // Start is called before the first frame update
-        void Start() {
-#if !UNITY_WEBGL || UNITY_EDITOR
-            // TODO when we have livekit
-            // Unity.WebRTC.WebRTC.Initialize();
-            // StartCoroutine(Unity.WebRTC.WebRTC.Update());
-#endif
-        }
-
         private void OnDestroy() {
-#if !UNITY_WEBGL || UNITY_EDITOR
-            // TODO When we have livekit
-            // Unity.WebRTC.WebRTC.Dispose();
-#endif
         }
 
         public void CreateWorlds()
@@ -101,7 +88,7 @@ namespace WebTick {
 
         private async void CreateWorlds(Mode mode) {
 
-            if (mode.HasFlag(Mode.Client)) { 
+            if (mode.HasFlag(Mode.Client)) {
                 var clientGo = new GameObject("Client");
                 var clientSettingsProvider = clientGo.AddComponent<Client.ClientSettingsProvider>();
                 this.clientSettings = await clientSettingsProvider.GetClientSettings();
@@ -125,10 +112,11 @@ namespace WebTick {
                 healthServer.StartWithServerSettings(this.serverSettings);
             }
 
-            if(Application.isEditor)
+            if (Application.isEditor)
             {
                 NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
-            } else
+            }
+            else
             {
                 NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager);
             }
