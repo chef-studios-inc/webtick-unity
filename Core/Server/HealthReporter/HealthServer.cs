@@ -43,7 +43,7 @@ namespace WebTick.Core.Server.HealthReporter
 
         public void StartWithServerSettings(ServerSettings serverSettings)
         {
-            port = serverSettings.statusPort;
+            port = serverSettings.status_port;
             serverThread = new Thread(Listen);
             serverThread.Start();
         }

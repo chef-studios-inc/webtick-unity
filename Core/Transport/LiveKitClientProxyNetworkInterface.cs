@@ -5,23 +5,19 @@ using Unity.Networking.Transport;
 using System;
 using Unity.Entities;
 using UnityEngine;
-using System.Linq;
 
 namespace WebTick.Transport
 {
-
-
-    public struct LiveKitServerNetworkInterface : INetworkInterface
+    public struct LiveKitClientProxyNetworkInterface : INetworkInterface
     {
         public static class Dependencies
         {
-            public static WebSocketManager websocketManager;
+            public static ClientProxyWebSocketManager clientProxyWebSocketManager;
         }
 
-
-        public LiveKitServerNetworkInterface(WebSocketManager websocketManager)
+        public LiveKitClientProxyNetworkInterface(ClientProxyWebSocketManager m)
         {
-            Dependencies.websocketManager = websocketManager;
+            Dependencies.clientProxyWebSocketManager = m;
         }
 
         public NetworkEndpoint LocalEndpoint
@@ -54,21 +50,20 @@ namespace WebTick.Transport
         public JobHandle ScheduleReceive(ref ReceiveJobArguments arguments, JobHandle dep)
         {
             JobHandle previousJob = dep;
-            while (!Dependencies.websocketManager.receiveQueue.IsEmpty)
+            while (!Dependencies.clientProxyWebSocketManager.receiveQueue.IsEmpty)
             {
-                Dependencies.websocketManager.receiveQueue.TryDequeue(out var msg);
-                var array = msg.payload.ToArray();
-                var na = new NativeArray<byte>(array, Allocator.TempJob);
-                previousJob = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = na, intSid = msg.sender }.Schedule(previousJob);
-                na.Dispose(previousJob);
+                Dependencies.clientProxyWebSocketManager.receiveQueue.TryDequeue(out var bytes);
+                var msg = new NativeArray<byte>(bytes.Length, Allocator.TempJob);
+                msg.CopyFrom(bytes);
+                previousJob = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
+                msg.Dispose(previousJob);
             }
 
-            return previousJob; 
+            return previousJob;
         }
 
         public unsafe JobHandle ScheduleSend(ref SendJobArguments arguments, JobHandle dep)
         {
-
             dep.Complete();
             for (int i = 0; i < arguments.SendQueue.Count; i++)
             {
@@ -80,17 +75,11 @@ namespace WebTick.Transport
                 }
 
 
-                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.Temp);
+                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.TempJob);
                 msg.CopyPayload(nativeByteArray.GetUnsafePtr(), msg.Length);
-                var addressBytes = msg.EndpointRef.GetRawAddressBytes();
-                if (!BitConverter.IsLittleEndian)
-                {
-                    Debug.LogWarning("Reversing endianess");
-                    addressBytes.Reverse();
-                }
-                Debug.LogFormat("[SERVER] send message {0} {1} address bytes {2} {3}", nativeByteArray[0], nativeByteArray[1], addressBytes[0], addressBytes[1]);
-                var recipientSid = BitConverter.ToUInt32(addressBytes);
-                Dependencies.websocketManager.SendMessage(nativeByteArray.ToArray(), recipientSid);
+                var payload = nativeByteArray.ToArray();
+                Debug.LogFormat("[CLIENT_PROXY] send message: {0} {1}", payload[0], payload[1]);
+                Dependencies.clientProxyWebSocketManager.SendMessage(payload);
                 nativeByteArray.Dispose();
             }
             arguments.SendQueue.Clear();
@@ -100,23 +89,21 @@ namespace WebTick.Transport
         struct ReceiveJob : IJob
         {
             public NativeArray<byte> message;
-            public uint intSid;
             public PacketsQueue receiveQueue;
 
             public unsafe void Execute()
             {
                 if (receiveQueue.EnqueuePacket(out var pp))
                 {
-                    var addressBytes = new NativeArray<byte>(BitConverter.GetBytes(intSid), Allocator.Temp);
-                    if(!BitConverter.IsLittleEndian)
-                    {
-                        Debug.LogWarning("Reversing endianess");
-                        addressBytes.Reverse();
-                    }
-                    pp.EndpointRef.SetRawAddressBytes(addressBytes, NetworkFamily.Ipv4);
+                    var address = new NativeArray<byte>(4, Allocator.Temp);
+                    address[0] = 1;
+                    address[1] = 2;
+                    address[2] = 3;
+                    address[3] = 4;
+                    pp.EndpointRef.SetRawAddressBytes(address, NetworkFamily.Ipv4);
                     pp.EndpointRef = pp.EndpointRef.WithPort(1234);
-                    addressBytes.Dispose();
                     pp.AppendToPayload(message.GetUnsafeReadOnlyPtr(), message.Length);
+                    address.Dispose();
                 };
             }
         }

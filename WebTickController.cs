@@ -23,7 +23,7 @@ namespace WebTick {
     }
 
     public struct ServerSettings {
-        public ushort statusPort;
+        public ushort status_port;
         public string ws_data_channel_proxy_url;
     }
 
@@ -43,6 +43,8 @@ namespace WebTick {
 
         private LiveKitManager liveKitManager;
         private ClientSettings clientSettings = new ClientSettings();
+        // for local debugging
+        private ClientProxyWebSocketManager clientProxyWSManager;
 
         private WebSocketManager wsManager;
         private ServerSettings serverSettings = new ServerSettings();
@@ -87,6 +89,20 @@ namespace WebTick {
         }
 
         private async void CreateWorlds(Mode mode) {
+            if (mode.HasFlag(Mode.Server))
+            {
+                var serverGo = new GameObject("Server");
+                var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
+                this.serverSettings = await serverSettingsProvider.GetServerSettings();
+                //todo
+                if (Application.isEditor)
+                {
+                    wsManager = serverGo.AddComponent<WebSocketManager>();
+                    await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
+                }
+                healthServer = serverGo.AddComponent<HealthServer>();
+                healthServer.StartWithServerSettings(this.serverSettings);
+            }
 
             if (mode.HasFlag(Mode.Client)) {
                 var clientGo = new GameObject("Client");
@@ -96,29 +112,24 @@ namespace WebTick {
                 {
                     liveKitManager = clientGo.AddComponent<LiveKitManager>();
                     await liveKitManager.Connect(this.clientSettings.url, this.clientSettings.token);
-                }
-            }
-            if (mode.HasFlag(Mode.Server))
-            {
-                var serverGo = new GameObject("Server");
-                var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
-                this.serverSettings = await serverSettingsProvider.GetServerSettings();
-                if (!Application.isEditor)
+                } else
                 {
-                    wsManager = serverGo.AddComponent<WebSocketManager>();
-                    await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
+                    //TODO
+                    clientProxyWSManager = clientGo.AddComponent<ClientProxyWebSocketManager>();
+                //ws://localhost:8080/ws/test
+                    await clientProxyWSManager.Connect("ws://localhost:8080/ws_client/test");
                 }
-                healthServer = serverGo.AddComponent<HealthServer>();
-                healthServer.StartWithServerSettings(this.serverSettings);
             }
 
             if (Application.isEditor)
             {
-                NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
+                //todo
+                //NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
+                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager, clientProxyWSManager);
             }
             else
             {
-                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager);
+                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager, clientProxyWSManager);
             }
 
             if (mode.HasFlag(Mode.Server)) {
@@ -153,7 +164,7 @@ namespace WebTick {
                 var nsd = nsdQuery.GetSingleton<NetworkStreamDriver>();
                 var endpoint = NetworkEndpoint.AnyIpv4.WithPort(7000);
                 nsd.Listen(endpoint);
-                while(!LiveKitServerNetworkInterface.Dependencies.websocketManager.isReady && !Application.isEditor)
+                while(!Application.isEditor && !LiveKitServerNetworkInterface.Dependencies.websocketManager.isReady)
                 {
                     yield return null; 
                 }

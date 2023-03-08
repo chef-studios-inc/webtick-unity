@@ -45,7 +45,8 @@ mergeInto(LibraryManager.library, {
 			if(sender.identity !== "server") {
 				return;
 			}
-			SendMessage(window.webtick.livekitGameObject, "Web_DataReceived", payload);
+			var base64String = btoa(String.fromCharCode.apply(null, new Uint8Array(payload)));
+			SendMessage(window.webtick.livekitGameObject, "Web_DataReceived", base64String);
 		});
 	},
 
@@ -60,7 +61,6 @@ mergeInto(LibraryManager.library, {
 		}
 
 		var payloadArr = new Uint8Array(HEAPU8.buffer, payload, payload_size);
-		console.log("NEIL sending payload", payload, payload_size);
 		window.webtick.room.localParticipant.publishData(payloadArr, 1, [window.webtick.serverParticipant]);
 	},
 

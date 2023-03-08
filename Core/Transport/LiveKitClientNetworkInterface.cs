@@ -4,7 +4,7 @@ using Unity.Jobs;
 using Unity.Networking.Transport;
 using System;
 using Unity.Entities;
-using System.Diagnostics;
+using UnityEngine;
 
 namespace WebTick.Transport
 {
@@ -52,13 +52,12 @@ namespace WebTick.Transport
             JobHandle previousJob = dep;
             while (!Dependencies.livekitManager.receiveQueue.IsEmpty)
             {
-                UnityEngine.Debug.Log("Receive packet");
+                // TODO schedule instead of run here
                 Dependencies.livekitManager.receiveQueue.TryDequeue(out var bytes);
                 var msg = new NativeArray<byte>(bytes.Length, Allocator.TempJob);
                 msg.CopyFrom(bytes);
-                var job = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
-                msg.Dispose(job);
-                previousJob = job;
+                previousJob = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
+                msg.Dispose();
             }
 
             return previousJob;
@@ -94,8 +93,15 @@ namespace WebTick.Transport
             {
                 if (receiveQueue.EnqueuePacket(out var pp))
                 {
-                    UnityEngine.Debug.LogFormat("Enqueing packet: {0}", message.Length);
+                    var address = new NativeArray<byte>(4, Allocator.Temp);
+                    address[0] = 1;
+                    address[1] = 2;
+                    address[2] = 3;
+                    address[3] = 4;
+                    pp.EndpointRef.SetRawAddressBytes(address, NetworkFamily.Ipv4);
+                    pp.EndpointRef = pp.EndpointRef.WithPort(1234);
                     pp.AppendToPayload(message.GetUnsafeReadOnlyPtr(), message.Length);
+                    address.Dispose();
                 };
             }
         }

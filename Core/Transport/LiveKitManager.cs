@@ -11,8 +11,6 @@ namespace WebTick.Transport
     {
         public ConcurrentQueue<byte[]> receiveQueue = new ConcurrentQueue<byte[]>();
         public bool isReady = false;
-        //private Room room;
-        //private RemoteParticipant serverParticipant;
         private LiveKit.LiveKit liveKit;
         private TaskCompletionSource<bool> connectedTask;
 
@@ -20,6 +18,13 @@ namespace WebTick.Transport
         {
             liveKit = gameObject.AddComponent<LiveKit.LiveKit>();
             liveKit.onConnected.AddListener(OnConnected);
+            liveKit.onServerData.AddListener(ServerDataReceived);
+        }
+
+        private void OnDestroy()
+        {
+            liveKit.onConnected.RemoveListener(OnConnected);
+            liveKit.onServerData.RemoveListener(ServerDataReceived);
         }
 
         public async Task Connect(string url, string token)
@@ -42,15 +47,10 @@ namespace WebTick.Transport
             connectedTask.SetResult(true);
         }
 
-        //private void Room_DataReceived(byte[] data, RemoteParticipant participant, DataPacketKind? kind)
-        //{
-        //    //if(participant.Identity != "server")
-        //    //{
-        //    //    return;
-        //    //}
-
-        //    //receiveQueue.Enqueue(data);
-        //}
+        private void ServerDataReceived(byte[] data)
+        {
+            receiveQueue.Enqueue(data);
+        }
     }
 
 #else

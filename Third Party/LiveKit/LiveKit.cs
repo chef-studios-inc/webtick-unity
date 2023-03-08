@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -21,6 +22,7 @@ namespace LiveKit
 
 
         public UnityEvent onConnected = new UnityEvent();
+        public UnityEvent<byte[]> onServerData = new UnityEvent<byte[]>();
 
         private void Start()
         {
@@ -51,9 +53,10 @@ namespace LiveKit
         }
 
         [Preserve]
-        private void Web_DataReceived(object payload)
+        private void Web_DataReceived(string payload)
         {
-            Debug.LogFormat("NEIL data received: {0}", payload);
+            byte[] bytes = System.Convert.FromBase64String(payload);
+            onServerData.Invoke(bytes);
         }
     }
 }
