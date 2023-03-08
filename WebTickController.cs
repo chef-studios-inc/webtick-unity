@@ -43,8 +43,6 @@ namespace WebTick {
 
         private LiveKitManager liveKitManager;
         private ClientSettings clientSettings = new ClientSettings();
-        // for local debugging
-        private ClientProxyWebSocketManager clientProxyWSManager;
 
         private WebSocketManager wsManager;
         private ServerSettings serverSettings = new ServerSettings();
@@ -94,8 +92,7 @@ namespace WebTick {
                 var serverGo = new GameObject("Server");
                 var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
                 this.serverSettings = await serverSettingsProvider.GetServerSettings();
-                //todo
-                if (Application.isEditor)
+                if (!Application.isEditor)
                 {
                     wsManager = serverGo.AddComponent<WebSocketManager>();
                     await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
@@ -112,24 +109,16 @@ namespace WebTick {
                 {
                     liveKitManager = clientGo.AddComponent<LiveKitManager>();
                     await liveKitManager.Connect(this.clientSettings.url, this.clientSettings.token);
-                } else
-                {
-                    //TODO
-                    clientProxyWSManager = clientGo.AddComponent<ClientProxyWebSocketManager>();
-                //ws://localhost:8080/ws/test
-                    await clientProxyWSManager.Connect("ws://localhost:8080/ws_client/test");
                 }
             }
 
             if (Application.isEditor)
             {
-                //todo
-                //NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
-                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager, clientProxyWSManager);
+                NetworkStreamReceiveSystem.DriverConstructor = new IPCAndSocketDriverConstructor();
             }
             else
             {
-                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager, clientProxyWSManager);
+                NetworkStreamReceiveSystem.DriverConstructor = new Transport.LiveKitDriverConstructor(wsManager, liveKitManager);
             }
 
             if (mode.HasFlag(Mode.Server)) {

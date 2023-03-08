@@ -14,6 +14,7 @@ using UnityEngine.XR;
 
 namespace WebTick.Transport
 {
+#if !UNITY_WEBGL
     public class WebSocketManager: MonoBehaviour 
     {
         private NativeWebSocket.WebSocket ws = null;
@@ -124,4 +125,33 @@ namespace WebTick.Transport
         }
 
     }
+#else
+    public class WebSocketManager : MonoBehaviour
+    {
+        private NativeWebSocket.WebSocket ws = null;
+
+        public ConcurrentQueue<Message> receiveQueue = new ConcurrentQueue<Message>();
+        public bool isReady = false;
+        public bool isError = false;
+        public bool isClosed = false;
+        public string error = null;
+
+        public struct Message
+        {
+            public uint sender;
+            public ArraySegment<byte> payload;
+        }
+
+        public Task Connect(string url)
+        {
+            throw new System.NotImplementedException("not available on webgl");
+        }
+
+        public void SendMessage(byte[] payload, uint recipient)
+        {
+            throw new System.NotImplementedException("not available on webgl");
+        }
+
+    }
+#endif
 }

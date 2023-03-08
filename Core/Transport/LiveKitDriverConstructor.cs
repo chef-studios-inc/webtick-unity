@@ -12,25 +12,16 @@ namespace WebTick.Transport
     {
         private WebSocketManager webSocketManager;
         private LiveKitManager liveKitManager;
-        private ClientProxyWebSocketManager clientProxyWebSocketManager;
 
         private LiveKitDriverConstructor() { }
 
-        public LiveKitDriverConstructor(WebSocketManager wsManager, LiveKitManager liveKitManager, ClientProxyWebSocketManager clientProxyWebSocketManager) {
+        public LiveKitDriverConstructor(WebSocketManager wsManager, LiveKitManager liveKitManager) {
             this.webSocketManager = wsManager;
             this.liveKitManager = liveKitManager;
-            this.clientProxyWebSocketManager = clientProxyWebSocketManager;
         }
 
         public void CreateClientDriver(World world, ref NetworkDriverStore driver, NetDebug netDebug)
         {
-            if(clientProxyWebSocketManager != null)
-            {
-                var di = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitClientProxyNetworkInterface(clientProxyWebSocketManager));
-                driver.RegisterDriver(TransportType.Socket, di);
-                return;
-            }
-
             var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitClientNetworkInterface(liveKitManager));
             driver.RegisterDriver(TransportType.Socket, driverInstance);
         }
