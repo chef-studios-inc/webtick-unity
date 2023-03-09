@@ -77,7 +77,6 @@ namespace WebTick.Transport
             }
             var sender = BitConverter.ToUInt32(data);
             var payload = new ArraySegment<byte>(data, 4, data.Length - 4);
-            Debug.LogFormat("[SERVER] on message: {0} {1}", payload[0], payload[1]);
             var msg = new Message
             {
                 sender = sender,
