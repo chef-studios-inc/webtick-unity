@@ -37,11 +37,11 @@ namespace WebTick.Transport
             ws.OnMessage += Ws_OnMessage;
             ws.OnClose += Ws_OnClose;
             ws.OnError += Ws_OnError;
-            Debug.Log("Connecting to websocket...");
+            Debug.LogFormat("Connecting to websocket: {0}", url);
             var tr = new TaskCompletionSource<bool>();
             _Connect();
             StartCoroutine(WaitForReadyMessage(tr));
-            Debug.Log("Connected to websocket");
+            Debug.LogFormat("Connected to websocket: {0}", url);
             await tr.Task;
         }
 

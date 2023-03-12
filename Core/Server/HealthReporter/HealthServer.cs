@@ -16,30 +16,7 @@ namespace WebTick.Core.Server.HealthReporter
         private Thread serverThread;
         private HttpListener listener;
         private uint port;
-        private WaitForSecondsRealtime wait = new WaitForSecondsRealtime(0.5f);
-        private World serverWorld;
-        private EntityQuery healthInfoQuery;
         public HealthInfo.Status status = HealthInfo.Status.Initializing;
-
-        private void Start()
-        {
-            foreach(var w in World.All)
-            {
-                if(w.IsServer())
-                {
-                    serverWorld = w;
-                    break;
-                }
-            }
-
-            if(serverWorld == null)
-            {
-                Debug.LogError("Couldn't find server world");
-            }
-
-            healthInfoQuery = serverWorld.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<HealthInfo>());
-            StartCoroutine(StatusSync());
-        }
 
         public void StartWithServerSettings(ServerSettings serverSettings)
         {
@@ -102,19 +79,8 @@ namespace WebTick.Core.Server.HealthReporter
             return data;
         }
 
-        private IEnumerator StatusSync()
-        {
-            yield return wait;
-            var healthInfo = healthInfoQuery.GetSingleton<HealthInfo>();
-            status = healthInfo.Value;
-        }
-
         private void OnDestroy()
         {
-            if(healthInfoQuery != null)
-            {
-                healthInfoQuery.Dispose();
-            }
             if(serverThread != null)
             {
                 serverThread.Abort();
