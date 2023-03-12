@@ -92,13 +92,14 @@ namespace WebTick {
                 var serverGo = new GameObject("Server");
                 var serverSettingsProvider = serverGo.AddComponent<WebTick.Core.Server.ServerSettingsProvider>();
                 this.serverSettings = await serverSettingsProvider.GetServerSettings();
+                healthServer = serverGo.AddComponent<HealthServer>();
+                healthServer.StartWithServerSettings(this.serverSettings);
                 if (!Application.isEditor)
                 {
                     wsManager = serverGo.AddComponent<WebSocketManager>();
                     await wsManager.Connect(serverSettings.ws_data_channel_proxy_url);
                 }
-                healthServer = serverGo.AddComponent<HealthServer>();
-                healthServer.StartWithServerSettings(this.serverSettings);
+
             }
 
             if (mode.HasFlag(Mode.Client)) {
