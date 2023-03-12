@@ -20,6 +20,7 @@ namespace WebTick.Core.Server.HealthReporter
 
         public void StartWithServerSettings(ServerSettings serverSettings)
         {
+            Debug.LogFormat("Health Server starting with port: {0}", serverSettings.status_port);
             port = serverSettings.status_port;
             serverThread = new Thread(Listen);
             serverThread.Start();
@@ -27,12 +28,13 @@ namespace WebTick.Core.Server.HealthReporter
 
         private void Listen()
         {
+            Debug.LogFormat("Health Server Listen");
             listener = new HttpListener();
             listener.Prefixes.Add("http://*:" + port.ToString() + "/status/");
             listener.Start();
 
             foreach(string prefix in listener.Prefixes) {
-                Debug.Log(prefix);
+                Debug.LogFormat("Listening on prefix: {0}", prefix);
             }
 
             while (true)
