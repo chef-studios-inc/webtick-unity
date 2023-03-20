@@ -13,12 +13,14 @@ namespace WebTick.Transport
         public bool isReady = false;
         private LiveKit.LiveKit liveKit;
         private TaskCompletionSource<bool> connectedTask;
+        private TaskCompletionSource<bool> livekitCreatedTask;
 
         private void Start()
         {
             liveKit = gameObject.AddComponent<LiveKit.LiveKit>();
             liveKit.onConnected.AddListener(OnConnected);
             liveKit.onServerData.AddListener(ServerDataReceived);
+            livekitCreatedTask.SetResult(true);
         }
 
         private void OnDestroy()
@@ -29,6 +31,7 @@ namespace WebTick.Transport
 
         public async Task Connect(string url, string token)
         {
+            await livekitCreatedTask.Task;
             Debug.Log("Connecting to livekit room");
             liveKit.ConnectToRoom(url, token);
             connectedTask = new TaskCompletionSource<bool>();
