@@ -13,7 +13,7 @@ namespace WebTick.Transport
         public bool isReady = false;
         private LiveKit.LiveKit liveKit;
         private TaskCompletionSource<bool> connectedTask;
-        private TaskCompletionSource<bool> livekitCreatedTask;
+        private TaskCompletionSource<bool> livekitCreatedTask =new TaskCompletionSource<bool>();
 
         private void Start()
         {
