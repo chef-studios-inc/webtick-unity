@@ -65,6 +65,9 @@ namespace WebTick.Conversion
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.Mesh)
             {
+                if(go.transform.lossyScale.sqrMagnitude != 1) {
+                    Debug.LogError("Mesh Colliders require uniform scale");
+                }
                 // NOTE is there a faster way to copy these arrays other than using burst/jobs?
                 var mesh = go.GetComponent<MeshFilter>().mesh;
                 var verts = new NativeArray<float3>(mesh.vertices.Length, Allocator.TempJob);
@@ -73,13 +76,13 @@ namespace WebTick.Conversion
                 var t = new NativeArray<int>(mesh.triangles, Allocator.TempJob);
 
                 var job = new MeshColliderJob {
-                    vertices = verts,
                     meshTriangles = t,
                     triangles = tris,
                 };
 
                 job.Run();
-                return Unity.Physics.MeshCollider.Create(verts, tris, filter, material);
+                var collider = Unity.Physics.MeshCollider.Create(verts, tris, filter, material);
+                return collider;
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.ConvexHull)
             {
@@ -96,7 +99,6 @@ namespace WebTick.Conversion
         [Unity.Burst.BurstCompile]
         public struct MeshColliderJob : IJob {
             public NativeArray<int> meshTriangles;
-            public NativeArray<float3> vertices;
             public NativeArray<int3> triangles;
             public void Execute() {
                 var trisLength = meshTriangles.Length;
@@ -122,7 +124,7 @@ namespace WebTick.Conversion
             var collider = CreateColliderFromShape(e, entityManager, go, physicsShapeAuthoring);
 
             entityManager.AddComponentData(e, new LocalToWorld());
-            entityManager.AddComponentData(e, LocalTransform.FromPositionRotationScale(transform.position, transform.rotation, 1.0f));
+            entityManager.AddComponentData(e, LocalTransform.FromPositionRotationScale(transform.position, transform.rotation, transform.lossyScale.x));
             entityManager.AddComponentData(e, new PhysicsCollider { Value = collider });
             entityManager.AddSharedComponentManaged(e, new PhysicsWorldIndex { Value = physicsBodyAuthoring.WorldIndex });
 
