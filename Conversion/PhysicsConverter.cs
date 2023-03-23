@@ -65,7 +65,8 @@ namespace WebTick.Conversion
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.Mesh)
             {
-                if(go.transform.lossyScale.sqrMagnitude != 1) {
+                var scale = go.transform.lossyScale;
+                if(scale.x != scale.y && scale.x != scale.z && scale.y != scale.z) {
                     Debug.LogError("Mesh Colliders require uniform scale");
                 }
                 // NOTE is there a faster way to copy these arrays other than using burst/jobs?
