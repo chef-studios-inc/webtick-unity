@@ -6,6 +6,8 @@ using Unity.Physics;
 using Unity.Physics.Authoring;
 using Unity.Transforms;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Jobs;
 
 
 namespace WebTick.Conversion
@@ -63,7 +65,21 @@ namespace WebTick.Conversion
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.Mesh)
             {
-                throw new System.Exception("Unhandled collider 'Mesh'");
+                // NOTE is there a faster way to copy these arrays other than using burst/jobs?
+                var mesh = go.GetComponent<MeshFilter>().mesh;
+                var verts = new NativeArray<float3>(mesh.vertices.Length, Allocator.TempJob);
+                verts.Reinterpret<Vector3>().CopyFrom(mesh.vertices);
+                var tris = new NativeArray<int3>(mesh.triangles.Length, Allocator.TempJob);
+                var t = new NativeArray<int>(mesh.triangles, Allocator.TempJob);
+
+                var job = new MeshColliderJob {
+                    vertices = verts,
+                    meshTriangles = t,
+                    triangles = tris,
+                };
+
+                job.Run();
+                return Unity.Physics.MeshCollider.Create(verts, tris, filter, material);
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.ConvexHull)
             {
@@ -76,6 +92,24 @@ namespace WebTick.Conversion
 
             throw new System.Exception("Unhandled Collider");
         }
+
+        [Unity.Burst.BurstCompile]
+        public struct MeshColliderJob : IJob {
+            public NativeArray<int> meshTriangles;
+            public NativeArray<float3> vertices;
+            public NativeArray<int3> triangles;
+            public void Execute() {
+                var trisLength = meshTriangles.Length;
+                for(int i = 0; i < trisLength; i += 3) {
+                    triangles[i] = new int3 {
+                        x = meshTriangles[i],
+                        y = meshTriangles[i + 1],
+                        z = meshTriangles[i + 2]
+                    };
+                }
+            }
+        }
+
 
         public static Component[] Convert(GameObject go, Entity e, EntityManager entityManager)
         {
