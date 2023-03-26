@@ -32,7 +32,9 @@ namespace WebTick.Objects
 
         void Start()
         {
+#if UNITY_WEBGL
             VideoPlayer_Create(gameObject.name, url);
+#endif
         }
 
         private void OnDestroy()
