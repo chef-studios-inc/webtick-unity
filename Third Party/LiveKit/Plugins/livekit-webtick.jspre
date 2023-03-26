@@ -1,1 +1,1 @@
-window.webtick = {livekitGameObject: "", room: null, serverParticipant: null, textDecoder: new TextDecoder()};
+window.webtick = Object.assign(window.webtick || {}, { livekitGameObject: "", room: null, serverParticipant: null, textDecoder: new TextDecoder() });
