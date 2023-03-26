@@ -11,7 +11,7 @@ namespace WebTick.Conversion
 {
     public class PhysicsStepConverter : MonoBehaviour, IConverter
     {
-        public Component[] Convert(IConverter.ConvertParams p)
+        public void Convert(IConverter.ConvertParams p)
         {
             var physicsStepAuthoring = p.go.GetComponent<PhysicsStepAuthoring>();
             var result = default(PhysicsStep);
@@ -29,8 +29,6 @@ namespace WebTick.Conversion
             result.SynchronizeCollisionWorld = (byte)(physicsStepAuthoring.SynchronizeCollisionWorld ? 1u : 0u);
 
             p.entityManager.AddComponentData(p.entity, result);
-
-            return new Component[] { physicsStepAuthoring };
         }
     }
 

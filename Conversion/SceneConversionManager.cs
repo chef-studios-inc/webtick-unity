@@ -17,8 +17,6 @@ namespace WebTick
             private HashSet<Transform> convertedServerSet = new HashSet<Transform>();
             private HashSet<Transform> convertedClientSet = new HashSet<Transform>();
 
-            //private HashSet<Component> componentsToRemove = new HashSet<Component>();
-
             private void Awake()
             {
                 instance = this;
@@ -35,13 +33,6 @@ namespace WebTick
                         ConvertTransform(world, t, convertedClientSet, world.EntityManager, false, true, false);
                     }
                 }
-
-                //foreach(var c in componentsToRemove)
-                //{
-                //    Destroy(c);
-                //}
-
-                //componentsToRemove.Clear();
             }
 
             private void ConvertTransform(World w, Transform t, HashSet<Transform> convertedSet, EntityManager em, bool server, bool client, bool thinClient)
@@ -80,7 +71,7 @@ namespace WebTick
 
                 foreach (var c in converters)
                 {
-                    var components = c.Convert(new IConverter.ConvertParams
+                    c.Convert(new IConverter.ConvertParams
                     {
                         client = client,
                         server = server,
@@ -91,11 +82,6 @@ namespace WebTick
                         parentEntity =pe,
                         hasParent = hasParent,
                     });
-
-                    //foreach(var comp in components)
-                    //{
-                    //    componentsToRemove.Add(comp);
-                    //}
                 }
             }
         }
