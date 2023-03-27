@@ -57,7 +57,7 @@ namespace WebTick.Transport
                 var msg = new NativeArray<byte>(bytes.Length, Allocator.TempJob);
                 msg.CopyFrom(bytes);
                 previousJob = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
-                msg.Dispose();
+                msg.Dispose(previousJob);
             }
 
             return previousJob;
