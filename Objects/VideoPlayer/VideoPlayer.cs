@@ -57,7 +57,7 @@ namespace WebTick.Objects
             this.texture = t;
             destination.material.mainTexture = t;
             VideoPlayer_Play(gameObject.name);
-            SetVolume(1);
+            SetVolume(0);
             SetFPS(20);
 #endif
         }
