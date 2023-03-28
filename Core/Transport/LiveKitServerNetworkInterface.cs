@@ -88,7 +88,6 @@ namespace WebTick.Transport
                     Debug.LogWarning("Reversing endianess");
                     addressBytes.Reverse();
                 }
-                Debug.LogFormat("[SERVER] send message {0} {1} address bytes {2} {3}", nativeByteArray[0], nativeByteArray[1], addressBytes[0], addressBytes[1]);
                 var recipientSid = BitConverter.ToUInt32(addressBytes);
                 Dependencies.websocketManager.SendMessage(nativeByteArray.ToArray(), recipientSid);
                 nativeByteArray.Dispose();

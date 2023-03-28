@@ -14,9 +14,9 @@ namespace WebTick.Conversion
 {
     public class PhysicsConverter : MonoBehaviour, IConverter
     {
-        public Component[] Convert(IConverter.ConvertParams p)
+        public void Convert(IConverter.ConvertParams p)
         {
-            return Convert(p.go, p.entity, p.entityManager);
+            Convert(p.go, p.entity, p.entityManager);
         }
 
         private static BlobAssetReference<Unity.Physics.Collider> CreateColliderFromShape(Entity e, EntityManager em, GameObject go, PhysicsShapeAuthoring physicsShapeAuthoring)
@@ -117,11 +117,10 @@ namespace WebTick.Conversion
         }
 
 
-        public static Component[] Convert(GameObject go, Entity e, EntityManager entityManager)
+        public static void Convert(GameObject go, Entity e, EntityManager entityManager)
         {
             var physicsShapeAuthoring = go.GetComponent<PhysicsShapeAuthoring>();
             var physicsBodyAuthoring = go.GetComponent<PhysicsBodyAuthoring>();
-            Debug.LogFormat("NEIL {0} - {1} - {2}", physicsShapeAuthoring, physicsBodyAuthoring, go);
             var isDynamic = physicsBodyAuthoring.MotionType == BodyMotionType.Dynamic;
             var transform = go.GetComponent<Transform>();
 
@@ -155,8 +154,6 @@ namespace WebTick.Conversion
                     entityManager.AddComponentData(e, PhysicsMass.CreateKinematic(colliderPtr->MassProperties));
                 }
             }
-
-            return new Component[] { physicsBodyAuthoring, physicsShapeAuthoring };
         }
     }
 

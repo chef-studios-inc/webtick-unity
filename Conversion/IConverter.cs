@@ -30,6 +30,6 @@ namespace WebTick.Conversion
         /// <param name="server"></param>
         /// <param name="thinClient"></param>
         /// <returns></returns>
-        public Component[] Convert(ConvertParams p);
+        public void Convert(ConvertParams p);
     }
 }

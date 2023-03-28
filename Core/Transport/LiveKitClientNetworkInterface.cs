@@ -52,12 +52,11 @@ namespace WebTick.Transport
             JobHandle previousJob = dep;
             while (!Dependencies.livekitManager.receiveQueue.IsEmpty)
             {
-                // TODO schedule instead of run here
                 Dependencies.livekitManager.receiveQueue.TryDequeue(out var bytes);
                 var msg = new NativeArray<byte>(bytes.Length, Allocator.TempJob);
                 msg.CopyFrom(bytes);
                 previousJob = new ReceiveJob { receiveQueue = arguments.ReceiveQueue, message = msg }.Schedule(previousJob);
-                msg.Dispose();
+                msg.Dispose(previousJob);
             }
 
             return previousJob;
@@ -75,7 +74,7 @@ namespace WebTick.Transport
                     continue;
                 }
 
-                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.TempJob);
+                var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.Temp);
                 msg.CopyPayload(nativeByteArray.GetUnsafePtr(), msg.Length);
                 Dependencies.livekitManager.SendMessageToServer(nativeByteArray.ToArray());
                 nativeByteArray.Dispose();
