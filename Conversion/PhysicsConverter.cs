@@ -73,16 +73,19 @@ namespace WebTick.Conversion
                 var mesh = go.GetComponent<MeshFilter>().mesh;
                 var verts = new NativeArray<float3>(mesh.vertices.Length, Allocator.TempJob);
                 verts.Reinterpret<Vector3>().CopyFrom(mesh.vertices);
-                var tris = new NativeArray<int3>(mesh.triangles.Length, Allocator.TempJob);
-                var t = new NativeArray<int>(mesh.triangles, Allocator.TempJob);
+                var int3Triangles = new NativeArray<int3>(mesh.triangles.Length, Allocator.TempJob);
+                var meshTriangles = new NativeArray<int>(mesh.triangles, Allocator.TempJob);
 
                 var job = new MeshColliderJob {
-                    meshTriangles = t,
-                    triangles = tris,
+                    meshTriangles = meshTriangles,
+                    triangles = int3Triangles,
                 };
 
                 job.Run();
-                var collider = Unity.Physics.MeshCollider.Create(verts, tris, filter, material);
+                var collider = Unity.Physics.MeshCollider.Create(verts, int3Triangles, filter, material);
+                verts.Dispose();
+                int3Triangles.Dispose();
+                meshTriangles.Dispose();
                 return collider;
             }
             else if (physicsShapeAuthoring.ShapeType == ShapeType.ConvexHull)
