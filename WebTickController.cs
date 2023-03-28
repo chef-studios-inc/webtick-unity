@@ -123,14 +123,14 @@ namespace WebTick {
             }
 
             if (mode.HasFlag(Mode.Server)) {
-                Debug.Log("attemping to create server world");
+                Debug.Log("attempting to create server world");
                 var serverWorld = ClientServerBootstrap.CreateServerWorld("Server");
                 InitializeWorld(serverWorld);
                 InvokeCreatedWorld(serverWorld);
             }
 
             if(mode.HasFlag(Mode.Client)) {
-                Debug.Log("attemping to create client world");
+                Debug.Log("attempting to create client world");
                 var clientWorld = ClientServerBootstrap.CreateClientWorld("Client");
                 InitializeWorld(clientWorld);
                 InvokeCreatedWorld(clientWorld);
