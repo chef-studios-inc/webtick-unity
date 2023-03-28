@@ -15,7 +15,7 @@ namespace WebTick.Objects
         private int textureId;
         private Texture2D texture;
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void VideoPlayer_Create(string gameObject, string url);
 
@@ -34,7 +34,7 @@ namespace WebTick.Objects
 
         void Start()
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             VideoPlayer_Create(gameObject.name, url);
 #endif
         }
@@ -42,7 +42,7 @@ namespace WebTick.Objects
         private void OnDestroy()
         {
             texture = null;
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             VideoPlayer_Destroy(gameObject.name);
 #endif
         }
@@ -50,7 +50,7 @@ namespace WebTick.Objects
         [Preserve]
         private void OnVideoCreated(int texture)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             this.textureId = texture;
             // TODO width and height?
             var t = Texture2D.CreateExternalTexture(1, 1, TextureFormat.RGBA32, false, false, (IntPtr)texture);
@@ -64,14 +64,14 @@ namespace WebTick.Objects
 
         public void SetVolume(float volume)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             VideoPlayer_SetVolume(gameObject.name, volume);
 #endif
         }
 
         public void SetFPS(int fps)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             VideoPlayer_SetFPS(gameObject.name, fps);
 #endif
         }

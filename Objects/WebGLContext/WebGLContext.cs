@@ -8,7 +8,7 @@ namespace WebTick.Objects
 {
     public class WebGLContext : MonoBehaviour
     {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void WebGLContext_Initialize(string gameObject);
 
@@ -24,7 +24,7 @@ namespace WebTick.Objects
 
         private void Start()
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             WebGLContext_Initialize(gameObject.name);
 #endif
         }
@@ -32,7 +32,7 @@ namespace WebTick.Objects
         [Preserve]
         private void GetCtx(int req_id)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             WebGLContext_GetCtxResponse(req_id);
 #endif
         }
@@ -40,7 +40,7 @@ namespace WebTick.Objects
         [Preserve]
         private void GetTexture(int req_id)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             WebGLContext_GetTextureResponse(req_id);
 #endif
         }
@@ -48,7 +48,7 @@ namespace WebTick.Objects
         [Preserve]
         private void DestroyTexture(int req_id, int texture_id)
         {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
             WebGLContext_DestroyTextureResponse(req_id, texture_id);
 #endif
         }
