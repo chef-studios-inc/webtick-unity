@@ -34,6 +34,7 @@ namespace WebTick.Transport
         public async Task Connect(string url)
         {
             ws = new NativeWebSocket.WebSocket(url);
+            ws.OnOpen += Ws_OnOpen;
             ws.OnMessage += Ws_OnMessage;
             ws.OnClose += Ws_OnClose;
             ws.OnError += Ws_OnError;
@@ -41,8 +42,12 @@ namespace WebTick.Transport
             var tr = new TaskCompletionSource<bool>();
             _Connect();
             StartCoroutine(WaitForReadyMessage(tr));
-            Debug.LogFormat("Connected to websocket: {0}", url);
             await tr.Task;
+        }
+
+        private void Ws_OnOpen()
+        {
+            Debug.LogFormat("Connected to websocket");
         }
 
         private async void _Connect()

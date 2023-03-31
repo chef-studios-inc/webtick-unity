@@ -30,7 +30,7 @@ namespace WebTick.Transport
         {
             if (webSocketManager != null)
             {
-                var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitServerNetworkInterface(webSocketManager));
+                var driverInstance = DefaultDriverBuilder.CreateServerNetworkDriver(new LiveKitServerNetworkInterface(webSocketManager));
                 driver.RegisterDriver(TransportType.Socket, driverInstance);
                 return;
             }

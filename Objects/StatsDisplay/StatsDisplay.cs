@@ -68,7 +68,7 @@ namespace WebTick.Objects
         {
             var fps = 1.0f / SystemAPI.Time.DeltaTime;
             var rtt = -1.0f;
-            Entities.ForEach((NetworkSnapshotAckComponent snapshot) => {
+            Entities.ForEach((NetworkSnapshotAck snapshot) => {
                 rtt = snapshot.EstimatedRTT;
             }).WithoutBurst().Run();
 

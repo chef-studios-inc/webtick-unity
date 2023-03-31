@@ -18,7 +18,8 @@ namespace WebTick
                     p.entityManager.AddComponentData(p.entity, new Parent { Value = p.parentEntity });
                 }
                 p.entityManager.AddComponentData(p.entity, LocalTransform.FromPositionRotationScale(transform.position, transform.rotation, 1.0f));
-                p.entityManager.AddComponentData(p.entity, new PostTransformScale { Value = new float3x3(new float3(transform.localScale.x, 1, 1), new float3(1, transform.localScale.y, 1), new float3(1, 1, transform.localScale.z)) });
+                //TODO
+                //p.entityManager.AddComponentData(p.entity, new  { Value = new float3x3(new float3(transform.localScale.x, 1, 1), new float3(1, transform.localScale.y, 1), new float3(1, 1, transform.localScale.z)) });
                 p.entityManager.AddComponentData(p.entity, new LocalToWorld { Value = (p.go.transform.localToWorldMatrix) });
             }
         }

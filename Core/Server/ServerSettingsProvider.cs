@@ -12,8 +12,7 @@ namespace WebTick.Core.Server
         {
             if (Application.isEditor)
             {
-                return Task.FromResult(new ServerSettings { ws_data_channel_proxy_url="ws://localhost:8080/ws/test", status_port=7000 });
-
+                return Task.FromResult(new ServerSettings { ws_data_channel_proxy_url= "ws://localhost:8080/ws/test", status_port=7000 });
             }
             var serverSettingsString = Environment.GetEnvironmentVariable("WEBTICK_SERVER_SETTINGS");
             if(string.IsNullOrEmpty(serverSettingsString))
