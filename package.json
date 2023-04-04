@@ -6,9 +6,9 @@
   "unity": "2022.2",
   "unityRelease": "5f1",
   "dependencies": {
-    "com.unity.entities": "1.0.0-pre.15",
-    "com.unity.netcode": "1.0.0-pre.15",
-    "com.unity.physics": "1.0.0-pre.15"
+    "com.unity.entities": "1.0.0-pre.65",
+    "com.unity.netcode": "1.0.0-pre.65",
+    "com.unity.physics": "1.0.0-pre.65"
   },
   "keywords": [
     "entities",
