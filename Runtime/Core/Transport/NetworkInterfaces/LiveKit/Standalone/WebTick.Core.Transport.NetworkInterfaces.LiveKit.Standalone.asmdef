@@ -1,0 +1,18 @@
+{
+    "name": "WebTick.LiveKit.Standalone.Live",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f2d49d9fa7e7eb3418e39723a7d3b92f",
+        "GUID:f12aafacab75a87499e7e45c873ffab8",
+        "GUID:11b92bfd7b1d96e419ec0f790d9c4614"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

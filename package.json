@@ -8,7 +8,8 @@
   "dependencies": {
     "com.unity.entities": "1.0.0-pre.65",
     "com.unity.netcode": "1.0.0-pre.65",
-    "com.unity.physics": "1.0.0-pre.65"
+    "com.unity.physics": "1.0.0-pre.65",
+    "com.unity.webrtc": "3.0.0-pre.4"
   },
   "keywords": [
     "entities",
