@@ -46,7 +46,7 @@ namespace WebTick.Livekit.Standalone
 
         private RTCConfiguration configuration;
 
-        public ConcurrentQueue<Message> receiveQueue;
+        public ConcurrentQueue<Message> receiveQueue = new ConcurrentQueue<Message>();
         public uint serverSid = 0;
 
         private Dictionary<uint, string> sidLookup = new Dictionary<uint, string>();
@@ -79,7 +79,7 @@ namespace WebTick.Livekit.Standalone
             }
         }
 
-        public async Task Connect(ConnectParams connectParams)
+        public async void Connect(ConnectParams connectParams)
         {
             configuration = default;
             configuration.iceServers = new[] { new RTCIceServer { urls = new[] { "stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302" } } };
@@ -99,11 +99,6 @@ namespace WebTick.Livekit.Standalone
             }
 
             CreateLocalPeerConnection();
-
-            while (localPeerConnection.ConnectionState != RTCPeerConnectionState.Connected || remotePeerConnection.ConnectionState != RTCPeerConnectionState.Connected)
-            {
-                await Task.Delay(250);
-            }
         }
 
         private void CreateLocalPeerConnection()
@@ -182,6 +177,7 @@ namespace WebTick.Livekit.Standalone
 
         private void SignalClient_OnJoin(object sender, LiveKit.Proto.JoinResponse joinResponse)
         {
+            Debug.LogFormat("[LICEKIT ENGINE] on join");
             participantSid = joinResponse.Participant.Sid;
             var participants = joinResponse.OtherParticipants.Select(pi => new Participant { identity = pi.Identity, sid = pi.Sid }).ToArray();
             foreach ( var participant in participants )
@@ -222,7 +218,7 @@ namespace WebTick.Livekit.Standalone
         {
             if (answer == null)
             {
-                Debug.LogError("NEIL no answer");
+                Debug.LogError("[LIVEKIT ENGINE] no answer");
                 return;
             }
             if (localPeerConnection == null)
@@ -371,8 +367,11 @@ namespace WebTick.Livekit.Standalone
 
         public void SendLossyMessage(byte[] bytes, uint recipient)
         {
-            var sid = sidLookup[recipient];
-            if (sid == null) return;
+            if (!sidLookup.TryGetValue(recipient, out var sid))
+            {
+                Debug.LogWarningFormat("No sid for hash: {0}", recipient);
+                return;
+            }
 
             _SendMessage(bytes, new string[] { sid }, false);
         }

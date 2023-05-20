@@ -18,10 +18,10 @@ namespace WebTick.Core.Server.HealthReporter
         private uint port;
         public HealthInfo.Status status = HealthInfo.Status.Initializing;
 
-        public void StartWithServerSettings(ServerSettings serverSettings)
+        public void StartWithServerSettings(uint port)
         {
-            Debug.LogFormat("Health Server starting with port: {0}", serverSettings.status_port);
-            port = serverSettings.status_port;
+            Debug.LogFormat("Health Server starting with port: {0}", port);
+            this.port = port;
             serverThread = new Thread(Listen);
             serverThread.Start();
         }

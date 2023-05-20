@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7969533464286766218
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6099817345514187582}
+  - component: {fileID: -8500551892151485997}
+  m_Layer: 0
+  m_Name: ConnectionDetails
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6099817345514187582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969533464286766218}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-8500551892151485997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7969533464286766218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0e7d406796b8742b4ba6979b710c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  wsUrl: wss://dc-vy1vtmzm.livekit.cloud
+  serverToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoic2VydmVyIiwianRpIjoic2VydmVyIn0.Lu9xVzONd-uKDn-VTxf_aobUWLrsFvvenI-KDyE4pto
+  clientTokens:
+  - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoiY2xpZW50XzEiLCJqdGkiOiJjbGllbnRfMSJ9.Khe1Sp2FPRg1hsc5b-ogJqw-6gWjA3kqSAhiwDlMrrE
+  - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoiY2xpZW50XzIiLCJqdGkiOiJjbGllbnRfMiJ9.RpQ_bwpjnaOTc3z0tN_PcDxCc6y7jKLOJRTj2NTHXU4
+  - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoiY2xpZW50XzMiLCJqdGkiOiJjbGllbnRfMyJ9.Rzq6rkuTIYUGH73nJYE0j0gFFlPs7mPN9CJhTE5ORxU
+  - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoiY2xpZW50XzQiLCJqdGkiOiJjbGllbnRfNCJ9.wz_WeBXOUYqCjxKzTFZP4Gl6p4a1TklegB55R7JI7gk
+  - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6IjVhMjY3ZjBlLWE3ZmItNDI4NC05MzYwLTFmZDc4MTYwMTc1NyIsImNhblB1Ymxpc2hEYXRhIjp0cnVlfSwiaWF0IjoxNjg0NDYzNTMzLCJuYmYiOjE2ODQ0NjM1MzMsImV4cCI6MTcxNTk5OTUzMywiaXNzIjoiQVBJY1VnU0tOcG9WS2R0Iiwic3ViIjoiY2xpZW50XzUiLCJqdGkiOiJjbGllbnRfNSJ9.aI6V9hMn_QtdBHeV1c03SRDBcpwJZcitH1ELvKNI9lk
