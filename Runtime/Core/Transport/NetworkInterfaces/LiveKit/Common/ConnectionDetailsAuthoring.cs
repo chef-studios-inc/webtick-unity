@@ -4,21 +4,22 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using Unity.NetCode;
-using WebTick.Transport;
 using System.Threading.Tasks;
-using WebTick.Core.Server;
 using System;
 using System.Runtime.CompilerServices;
+using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client;
+using WebTick.Core.Server;
 
-namespace WebTick
+namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
 {
     [System.Serializable]
     public struct ServerSettings
     {
         public string ws_url;
         public string token;
-        public string health_port;
+        public uint health_port;
     }
+
 
     public interface IProductionClientConnectionDetailsProvider
     {
@@ -32,6 +33,11 @@ namespace WebTick
 
     public class ConnectionDetailsAuthoring : MonoBehaviour
     {
+        private void Start()
+        {
+            Debug.Log("NEILLLLL");
+        }
+
         public enum Mode
         {
             UseEditorDetails,
@@ -46,11 +52,6 @@ namespace WebTick
         private IProductionClientConnectionDetailsProvider productionClientDetailsProvider = null;
         private int index = 0;
 
-        public string GetServerToken()
-        {
-            return serverToken;
-        }
-
         private string GetClientToken()
         {
             if(index >= clientTokens.Count)
@@ -64,7 +65,6 @@ namespace WebTick
         {
             public override void Bake(ConnectionDetailsAuthoring authoring)
             {
-                Debug.LogFormat("NEIL bake");
                 var e = CreateAdditionalEntity(TransformUsageFlags.None, false, "EditorServerConnectionDetails");
                 AddComponentObject(e, new ConnectionDetailsReference { value = authoring });
                 authoring.productionClientDetailsProvider = authoring.GetComponentInChildren<IProductionClientConnectionDetailsProvider>();
@@ -107,7 +107,7 @@ namespace WebTick
 
             if(mode == Mode.UseEditorDetails)
             {
-                return new ServerConnectionDetails { token = serverToken, wsUrl = wsUrl };
+                return new ServerConnectionDetails { token = serverToken, wsUrl = wsUrl, healthPort=7882 };
             } else if(mode == Mode.UseProductionDetails)
             {
                 return GetProductionServerConnectionDetails();
@@ -120,7 +120,7 @@ namespace WebTick
         {
             var serverSettingsString = Environment.GetEnvironmentVariable("WEBTICK_SERVER_SETTINGS");
             var serverSettings = JsonUtility.FromJson<ServerSettings>(serverSettingsString);
-            return new ServerConnectionDetails { token = serverSettings.token, wsUrl = serverSettings.ws_url };
+            return new ServerConnectionDetails { token = serverSettings.token, wsUrl = serverSettings.ws_url, healthPort = serverSettings.health_port };
         }
 
     }

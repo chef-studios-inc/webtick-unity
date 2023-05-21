@@ -1,26 +1,27 @@
-using Codice.CM.Client.Differences;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
-using WebTick.Core.Server.HealthReporter;
-using WebTick;
-using WebTick.Livekit.Standalone;
 using Unity.Networking.Transport;
 using System.Threading.Tasks;
 using WebTick.Transport;
+using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common;
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
+using WebTick.Livekit.Standalone;
+#endif
 
-namespace WebTick.Transport
+namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client
 {
+
+    public struct ClientConnectRequest: IComponentData { };
     public struct ClientConnectionDetails : IComponentData
     {
         public FixedString512Bytes wsUrl;
         public FixedString512Bytes token;
     }
-
-    public struct ClientConnectRequest: IComponentData { };
 
     class GetClientConnectionDetailsTask: IComponentData
     {
@@ -29,11 +30,14 @@ namespace WebTick.Transport
 
     struct GetClientConnectionDetailsTaskTag : IComponentData { };
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
     class ClientGameObject : IComponentData
     {
         public uint engineHandle;
         public RTCEngine rtcEngine;
     }
+#endif
 
     [WorldSystemFilter(WorldSystemFilterFlags.ClientSimulation | WorldSystemFilterFlags.ThinClientSimulation)]
     [UpdateInGroup(typeof(SimulationSystemGroup))]
@@ -82,7 +86,13 @@ namespace WebTick.Transport
                 }
                 if(task.value.IsCompletedSuccessfully)
                 {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                    var clientConnectionDetailsEntity = ecb.CreateEntity();
+                    ecb.SetName(clientConnectionDetailsEntity, "ClientConnectionDetails");
+                    ecb.SetComponent(clientConnectionDetailsEntity, task.value.Result);
+#else
                     CreateRTCEngineGameObject(ecb, task.value.Result);
+#endif
                 }
 
                 var nsde = SystemAPI.GetSingletonEntity<NetworkStreamDriver>();
@@ -101,6 +111,8 @@ namespace WebTick.Transport
             base.OnDestroy();
         }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
         private static void CreateRTCEngineGameObject(EntityCommandBuffer em, ClientConnectionDetails clientConnectionDetails)
         {
             var e = em.CreateEntity();
@@ -118,6 +130,7 @@ namespace WebTick.Transport
             em.AddComponent(e, clientGameObject);
 
         }
+#endif
     }
 }
 

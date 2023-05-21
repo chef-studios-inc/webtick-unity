@@ -5,9 +5,13 @@ using UnityEngine;
 using WebTick.Core.Server.HealthReporter;
 using WebTick;
 using Unity.Collections;
-using WebTick.Livekit.Standalone;
 using Unity.NetCode;
 using Unity.Networking.Transport;
+using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common;
+#if UNITY_WEBGL && !UNITY_EDITOR
+#else
+using WebTick.Livekit.Standalone;
+#endif
 
 namespace WebTick.Core.Server
 {
@@ -15,23 +19,25 @@ namespace WebTick.Core.Server
     {
         public FixedString512Bytes wsUrl;
         public FixedString512Bytes token;
+        public uint healthPort;
     }
 
-    struct ServerConnectionTag : IComponentData { }
     public struct ServerConnectRequest: IComponentData { };
-
-    class ServerGameObject: IComponentData {
-        public uint engineHandle;
-        public RTCEngine rtcEngine;
-    }
 
     [WorldSystemFilter(WorldSystemFilterFlags.ServerSimulation)]
     [UpdateInGroup(typeof(SimulationSystemGroup))]
     public partial class ServerConnectSystem : SystemBase
     {
-        protected override void OnCreate()
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        protected override void OnUpdate()
         {
-            base.OnCreate();
+            throw new System.NotImplementedException("Not implemented");
+        }
+#else
+        public class ServerGameObject: IComponentData {
+            public uint engineHandle;
+            public RTCEngine rtcEngine;
         }
 
         protected override void OnUpdate()
@@ -72,16 +78,10 @@ namespace WebTick.Core.Server
             //StartCoroutine(HealthCheckLoop());
         }
 
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
-
         private static void CreateRTCEngineGameObject(EntityCommandBuffer em, ServerConnectionDetails serverConnectionDetails)
         {
             var e = em.CreateEntity();
             em.SetName(e, "ServerConnection");
-            em.AddComponent<ServerConnectionTag>(e);
             em.AddComponent(e, serverConnectionDetails);
             var go = new GameObject("ServerConnection");
             var rtcEngine = go.AddComponent<RTCEngine>();
@@ -94,6 +94,7 @@ namespace WebTick.Core.Server
             em.AddComponent(e, serverGameObject);
 
         }
+#endif
     }
 }
 

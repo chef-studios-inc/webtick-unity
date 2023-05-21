@@ -1,0 +1,19 @@
+{
+    "name": "WebTick.Core.Transport.NetworkInterfaces.LiveKit.LiveKit",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f12aafacab75a87499e7e45c873ffab8",
+        "GUID:11b92bfd7b1d96e419ec0f790d9c4614"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [
+        "WebGL"
+    ],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

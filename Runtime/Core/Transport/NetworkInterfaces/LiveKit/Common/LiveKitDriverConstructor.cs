@@ -7,6 +7,7 @@ using Unity.Entities;
 using Unity.NetCode;
 using UnityEngine;
 using WebTick.Core.Server;
+using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client.Standalone;
 
 namespace WebTick.Transport
 {
@@ -14,14 +15,12 @@ namespace WebTick.Transport
     {
         public void CreateClientDriver(World world, ref NetworkDriverStore driver, NetDebug netDebug)
         {
-#if UNITY_WEBGL
-            var token = settings.token;
-            var url = settings.url;
-            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitClientNetworkInterface(url, token));
+#if UNITY_WEBGL && !UNITY_EDITOR
+            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitClientNetworkInterface(world.EntityManager));
             driver.RegisterDriver(TransportType.Socket, driverInstance);
             return;
 #else
-            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new WebTick.Transport.LiveKitStandaloneClientNetworkInterface(world.EntityManager));
+            var driverInstance = DefaultDriverBuilder.CreateClientNetworkDriver(new LiveKitStandaloneClientNetworkInterface(world.EntityManager));
             driver.RegisterDriver(TransportType.Socket, driverInstance);
 #endif
         }

@@ -7,18 +7,55 @@ using Unity.Networking.Transport;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using WebTick.Core.Server;
 
-namespace WebTick.Transport
+namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client.Standalone
 {
-    public struct LiveKitStandaloneServerNetworkInterface : INetworkInterface
+    public struct LiveKitStandaloneClientNetworkInterface : INetworkInterface
     {
-        private uint engineHandle; 
-        private EntityQuery serverGameObjectQuery;
-
-        public LiveKitStandaloneServerNetworkInterface(EntityManager em)
+#if UNITY_WEBGL && !UNITY_EDITOR
+        public LiveKitStandaloneClientNetworkInterface(EntityManager em)
         {
-            serverGameObjectQuery = em.CreateEntityQuery(typeof(ServerGameObject));
+        }
+
+        public NetworkEndpoint LocalEndpoint => throw new NotImplementedException();
+
+        public int Bind(NetworkEndpoint endpoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Initialize(ref NetworkSettings settings, ref int packetPadding)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int Listen()
+        {
+            throw new NotImplementedException();
+        }
+
+        public JobHandle ScheduleReceive(ref ReceiveJobArguments arguments, JobHandle dep)
+        {
+            throw new NotImplementedException();
+        }
+
+        public JobHandle ScheduleSend(ref SendJobArguments arguments, JobHandle dep)
+        {
+            throw new NotImplementedException();
+        }
+
+#else
+        private EntityQuery clientGameObjectQuery;
+        private uint engineHandle;
+
+        public LiveKitStandaloneClientNetworkInterface(EntityManager em)
+        {
+            clientGameObjectQuery = em.CreateEntityQuery(typeof(ClientGameObject));
             this.engineHandle = 0;
         }
 
@@ -31,6 +68,7 @@ namespace WebTick.Transport
 
         public void Dispose()
         {
+            //TODO?
         }
 
         public int Initialize(ref NetworkSettings settings, ref int packetPadding)
@@ -45,9 +83,9 @@ namespace WebTick.Transport
 
         public JobHandle ScheduleReceive(ref ReceiveJobArguments arguments, JobHandle dep)
         {
-            if(engineHandle == 0 && serverGameObjectQuery.HasSingleton<ServerGameObject>())
+            if(engineHandle == 0 && clientGameObjectQuery.HasSingleton<ClientGameObject>())
             {
-                var clientGO = serverGameObjectQuery.GetSingleton<ServerGameObject>();
+                var clientGO = clientGameObjectQuery.GetSingleton<ClientGameObject>();
                 this.engineHandle = clientGO.engineHandle; 
             }
             return new ReceiveJob { engineHandle=engineHandle, receiveQueue = arguments.ReceiveQueue }.Schedule(dep);
@@ -55,9 +93,9 @@ namespace WebTick.Transport
 
         public unsafe JobHandle ScheduleSend(ref SendJobArguments arguments, JobHandle dep)
         {
-            if(engineHandle == 0 && serverGameObjectQuery.HasSingleton<ServerGameObject>())
+            if(engineHandle == 0 && clientGameObjectQuery.HasSingleton<ClientGameObject>())
             {
-                var clientGO = serverGameObjectQuery.GetSingleton<ServerGameObject>();
+                var clientGO = clientGameObjectQuery.GetSingleton<ClientGameObject>();
                 this.engineHandle = clientGO.engineHandle; 
             }
             dep.Complete();
@@ -72,7 +110,7 @@ namespace WebTick.Transport
 
                 var nativeByteArray = new NativeArray<byte>(msg.Length, Allocator.Temp);
                 msg.CopyPayload(nativeByteArray.GetUnsafePtr(), msg.Length);
-                var recipient = BitConverter.ToUInt32(msg.EndpointRef.GetRawAddressBytes());
+                var recipient = RTCEngineManager.GetServerId(engineHandle);
                 RTCEngineManager.SendData(engineHandle, nativeByteArray.ToArray(), recipient);
                 nativeByteArray.Dispose();
             }
@@ -123,5 +161,6 @@ namespace WebTick.Transport
                 }
             }
         }
+#endif
     }
 }

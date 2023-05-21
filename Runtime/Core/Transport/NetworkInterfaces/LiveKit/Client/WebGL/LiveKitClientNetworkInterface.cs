@@ -4,10 +4,13 @@ using Unity.Jobs;
 using Unity.Networking.Transport;
 using System;
 using System.Runtime.InteropServices;
+using System.Xml;
+using Unity.Entities;
+using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client;
 
 namespace WebTick.Transport
 {
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
     public struct LiveKitClientNetworkInterface : INetworkInterface
     {
         struct LiveKit
@@ -29,13 +32,11 @@ namespace WebTick.Transport
 
         }
 
-        FixedString512Bytes url;
-        FixedString512Bytes token;
+        private EntityQuery clientConnectionDetailsQuery;
 
-        public LiveKitClientNetworkInterface(string url, string token)
+        public LiveKitClientNetworkInterface(EntityManager em)
         {
-            this.url = url;
-            this.token = token;
+            clientConnectionDetailsQuery = em.CreateEntityQuery(typeof(ClientConnectionDetails));
         }
 
         public NetworkEndpoint LocalEndpoint
@@ -57,7 +58,6 @@ namespace WebTick.Transport
 
         public int Initialize(ref NetworkSettings settings, ref int packetPadding)
         {
-            LiveKit.LK_ConnectToRoom(url.ToString(), token.ToString());
             return 0;
         }
 
@@ -74,6 +74,15 @@ namespace WebTick.Transport
         public unsafe JobHandle ScheduleSend(ref SendJobArguments arguments, JobHandle dep)
         {
             dep.Complete();
+            if(!LiveKit.LK_IsConnected())
+            {
+                if(clientConnectionDetailsQuery.TryGetSingleton<ClientConnectionDetails>(out var ccd))
+                {
+                    LiveKit.LK_ConnectToRoom(ccd.wsUrl.ToString(), ccd.token.ToString());
+                }
+                return dep;
+            }
+
             for (int i = 0; i < arguments.SendQueue.Count; i++)
             {
                 var msg = arguments.SendQueue[i];
@@ -115,7 +124,7 @@ namespace WebTick.Transport
 
                     if (nbytes > 0)
                     {
-                        packetProcessor.SetUnsafeMetadata(nbytes, packetProcessor.Offset);
+                        packetProcessor.AppendToPayload((void*)((IntPtr)(byte*)packetProcessor.GetUnsafePayloadPtr() + packetProcessor.Offset), nbytes); // TODO this is an extra copy
                     }
                     else
                     {
