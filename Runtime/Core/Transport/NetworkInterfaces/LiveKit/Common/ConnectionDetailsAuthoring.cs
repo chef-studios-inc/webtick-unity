@@ -20,18 +20,7 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
         public uint health_port;
     }
 
-
-    public interface IProductionClientConnectionDetailsProvider
-    {
-        public Task<ClientConnectionDetails> GetProductionClientConnectionDetails();
-    }
-
-    public class ConnectionDetailsReference: IComponentData
-    {
-        public ConnectionDetailsAuthoring value;
-    }
-
-    public class ConnectionDetailsAuthoring : MonoBehaviour
+    public class ConnectionDetails : MonoBehaviour
     {
         public enum Mode
         {
@@ -44,8 +33,23 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
         public string wsUrl;
         public string serverToken;
         public List<string> clientTokens;
-        private IProductionClientConnectionDetailsProvider productionClientDetailsProvider = null;
+        public static ConnectionDetails instance;
         private int index = 0;
+
+        private void Awake()
+        {
+            if(instance != null)
+            {
+                throw new Exception("Only one connection details allowed");
+            }
+            instance = this;
+
+        }
+
+        private void OnDestroy()
+        {
+            instance = null;
+        }
 
         private string GetClientToken()
         {
@@ -56,24 +60,10 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
             return clientTokens[index++];
         }
 
-        public class Baker : Baker<ConnectionDetailsAuthoring>
-        {
-            public override void Bake(ConnectionDetailsAuthoring authoring)
-            {
-                var e = CreateAdditionalEntity(TransformUsageFlags.None, false, "EditorServerConnectionDetails");
-                var go = Instantiate(authoring);
-                AddComponentObject(e, new ConnectionDetailsReference { value = go });
-                authoring.productionClientDetailsProvider = authoring.GetComponentInChildren<IProductionClientConnectionDetailsProvider>();
-            }
-        }
-
         protected virtual Task<ClientConnectionDetails> GetProductionClientDetails()
         {
-            if(productionClientDetailsProvider == null)
-            {
-                throw new System.Exception("Must add an IProductionClientConnectionDetails child monobehavior to this prefab");
-            }
-            return productionClientDetailsProvider.GetProductionClientConnectionDetails();
+
+            throw new System.Exception("Must implement GetProductionClientDetails in subclass");
         }
 
         public async Task<ClientConnectionDetails> GetClientConnectionDetails()

@@ -50,19 +50,13 @@ namespace WebTick.Core.Server
                 {
                     return;
                 }
-                ConnectionDetailsReference connectionDetailsReference = null;
-                Entities.ForEach((ConnectionDetailsReference reference) =>
+                if(ConnectionDetails.instance == null)
                 {
-                    connectionDetailsReference = reference;
-                }).WithoutBurst().Run();
-
-                if (connectionDetailsReference == null)
-                {
-                    Debug.LogWarning("No ConnectionDetailsReference when connecting");
+                    Debug.LogWarning("No ConnectionDetails when connecting");
                     return;
                 }
 
-                var serverConnectionDetails = connectionDetailsReference.value.GetServerConnectionDetails();
+                var serverConnectionDetails = ConnectionDetails.instance.GetServerConnectionDetails();
                 CreateRTCEngineGameObject(ecb, serverConnectionDetails);
                 var nsde = SystemAPI.GetSingletonEntity<NetworkStreamDriver>();
                 var nsd = SystemAPI.GetComponent<NetworkStreamDriver>(nsde);

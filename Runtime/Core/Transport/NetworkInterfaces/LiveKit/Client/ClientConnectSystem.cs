@@ -54,19 +54,13 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client
             // Fetch client connecton details
             foreach (var (_, entity) in SystemAPI.Query<RefRO<ClientConnectRequest>>().WithEntityAccess())
             {
-                ConnectionDetailsReference connectionDetailsReference = null;
-                Entities.ForEach((ConnectionDetailsReference reference) =>
+                if (ConnectionDetails.instance == null)
                 {
-                    connectionDetailsReference = reference;
-                }).WithoutBurst().Run();
-
-                if (connectionDetailsReference == null)
-                {
-                    Debug.LogWarning("No ConnectionDetailsReference when connecting");
+                    Debug.LogWarning("No ConnectionDetails when connecting");
                     return;
                 }
 
-                var connectionDetailsTask = connectionDetailsReference.value.GetClientConnectionDetails();
+                var connectionDetailsTask = ConnectionDetails.instance.GetClientConnectionDetails();
                 var taskEntity = ecb.CreateEntity();
                 ecb.AddComponent(taskEntity, new GetClientConnectionDetailsTask { value = connectionDetailsTask });
                 ecb.AddComponent<GetClientConnectionDetailsTaskTag>(taskEntity);

@@ -46,9 +46,14 @@ namespace WebTick.Core.Server.HealthReporter
             foreach (var (_, entity) in SystemAPI.Query<RefRO<HealthServerTag>>().WithNone<HealthServerListeningTag>().WithEntityAccess())
             {
                 uint healthPort = 0;
-                Entities.ForEach((Entity e, ConnectionDetailsReference connDetails) => {
-                    healthPort = connDetails.value.GetServerConnectionDetails().healthPort;
-                }).WithoutBurst().Run();
+                if (ConnectionDetails.instance != null)
+                {
+                    healthPort = ConnectionDetails.instance.GetServerConnectionDetails().healthPort;
+                }
+                else
+                {
+                    Debug.LogWarning("No connection details reference");
+                }
 
                 var healthServerReference = EntityManager.GetComponentData<HealthServerReference>(entity);
                 if(healthPort > 0)
