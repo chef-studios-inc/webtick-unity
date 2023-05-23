@@ -52,7 +52,7 @@ namespace WebTick.Core.Server.HealthReporter
                 }
                 else
                 {
-                    Debug.LogWarning("No connection details reference");
+                    Debug.LogWarning("No connection details");
                 }
 
                 var healthServerReference = EntityManager.GetComponentData<HealthServerReference>(entity);
