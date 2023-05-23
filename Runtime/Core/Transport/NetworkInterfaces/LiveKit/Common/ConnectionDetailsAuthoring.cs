@@ -33,11 +33,6 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
 
     public class ConnectionDetailsAuthoring : MonoBehaviour
     {
-        private void Start()
-        {
-            Debug.Log("NEILLLLL");
-        }
-
         public enum Mode
         {
             UseEditorDetails,
@@ -66,7 +61,8 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
             public override void Bake(ConnectionDetailsAuthoring authoring)
             {
                 var e = CreateAdditionalEntity(TransformUsageFlags.None, false, "EditorServerConnectionDetails");
-                AddComponentObject(e, new ConnectionDetailsReference { value = authoring });
+                var go = Instantiate(authoring);
+                AddComponentObject(e, new ConnectionDetailsReference { value = go });
                 authoring.productionClientDetailsProvider = authoring.GetComponentInChildren<IProductionClientConnectionDetailsProvider>();
             }
         }
