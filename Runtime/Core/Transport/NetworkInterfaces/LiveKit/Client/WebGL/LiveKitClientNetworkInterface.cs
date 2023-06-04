@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Xml;
 using Unity.Entities;
 using WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client;
+using UnityEngine;
+using System.Collections.Generic;
 
 namespace WebTick.Transport
 {
@@ -25,6 +27,9 @@ namespace WebTick.Transport
             public static extern int LK_ReceiveData(IntPtr data, int size);
 
             [DllImport("__Internal")]
+            public static extern bool LK_NeedsConnection();
+
+            [DllImport("__Internal")]
             public static extern bool LK_IsConnected();
 
             [DllImport("__Internal")]
@@ -32,11 +37,16 @@ namespace WebTick.Transport
 
         }
 
-        private EntityQuery clientConnectionDetailsQuery;
+        private static Dictionary<uint, World> worldMap = new Dictionary<uint, World>();
+        private static uint lastHandle = 1;
+        private uint handle;
 
         public LiveKitClientNetworkInterface(EntityManager em)
         {
-            clientConnectionDetailsQuery = em.CreateEntityQuery(typeof(ClientConnectionDetails));
+            handle = lastHandle;
+            lastHandle++;
+
+            worldMap[handle] = em.World;
         }
 
         public NetworkEndpoint LocalEndpoint
@@ -54,6 +64,7 @@ namespace WebTick.Transport
 
         public void Dispose()
         {
+            worldMap.Remove(handle);
         }
 
         public int Initialize(ref NetworkSettings settings, ref int packetPadding)
@@ -74,12 +85,23 @@ namespace WebTick.Transport
         public unsafe JobHandle ScheduleSend(ref SendJobArguments arguments, JobHandle dep)
         {
             dep.Complete();
-            if(!LiveKit.LK_IsConnected())
+            if(LiveKit.LK_NeedsConnection())
             {
-                if(clientConnectionDetailsQuery.TryGetSingleton<ClientConnectionDetails>(out var ccd))
-                {
-                    LiveKit.LK_ConnectToRoom(ccd.wsUrl.ToString(), ccd.token.ToString());
+                Debug.LogFormat("NEIL livekit not connected - send");
+                var world = worldMap[handle];
+                var eqd = new EntityQueryDesc { All = new ComponentType[] { typeof(ClientConnectionDetails) } };
+                var eq = world.EntityManager.CreateEntityQuery(eqd);
+                var ccds = eq.ToComponentDataArray<ClientConnectionDetails>(Allocator.Temp);
+                if (ccds.Length == 0) {
+                    return dep;
                 }
+                var ccd = ccds[0];
+                Debug.LogFormat("NEIL livekit connecting to {0} - {1}", ccd.wsUrl.ToString(), ccd.token.ToString());
+                LiveKit.LK_ConnectToRoom(ccd.wsUrl.ToString(), ccd.token.ToString());
+                return dep;
+            }
+
+            if(!LiveKit.LK_IsConnected()) {
                 return dep;
             }
 
@@ -108,15 +130,17 @@ namespace WebTick.Transport
 
             public unsafe void Execute()
             {
-                if (!LiveKit.LK_IsConnected())
-                {
-                    return;
-                }
 
                 while (true)
                 {
                     if (!receiveQueue.EnqueuePacket(out var packetProcessor))
                     {
+                        break;
+                    }
+
+                    if (!LiveKit.LK_IsConnected())
+                    {
+                        packetProcessor.Drop();
                         break;
                     }
 

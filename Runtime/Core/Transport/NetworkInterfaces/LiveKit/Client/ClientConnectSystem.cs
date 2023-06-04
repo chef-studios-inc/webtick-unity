@@ -81,9 +81,12 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client
                 if(task.value.IsCompletedSuccessfully)
                 {
 #if UNITY_WEBGL && !UNITY_EDITOR
+                    Debug.LogFormat("NEIL Creating client connection details: {0}", task.value.Result.token);
                     var clientConnectionDetailsEntity = ecb.CreateEntity();
                     ecb.SetName(clientConnectionDetailsEntity, "ClientConnectionDetails");
-                    ecb.SetComponent(clientConnectionDetailsEntity, task.value.Result);
+                    var newToken = new FixedString512Bytes(task.value.Result.token);
+                    var newWs = new FixedString512Bytes(task.value.Result.wsUrl);
+                    ecb.AddComponent(clientConnectionDetailsEntity, new ClientConnectionDetails { token = newToken, wsUrl = newWs });
 #else
                     CreateRTCEngineGameObject(ecb, task.value.Result);
 #endif

@@ -76,6 +76,16 @@ const livekit = {
 		LiveKitData.room.localParticipant.publishData(payloadArr, 1, [LiveKitData.serverParticipant]);
 	},
 
+	LK_NeedsConnection: function() {
+                if(!LiveKitData.room) {
+                  return true;
+                }
+                if(!LiveKitData.room.state === "disconnected") {
+                  return true;
+                }
+                return false;
+	},
+
 	LK_IsConnected: function() {
 		return LiveKitData.serverParticipant != null;
 	},

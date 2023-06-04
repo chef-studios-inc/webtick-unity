@@ -62,7 +62,6 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
 
         protected virtual Task<ClientConnectionDetails> GetProductionClientDetails()
         {
-
             throw new System.Exception("Must implement GetProductionClientDetails in subclass");
         }
 
@@ -79,6 +78,7 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
                 return new ClientConnectionDetails { token = token, wsUrl = wsUrl };
             } else if(mode == Mode.UseProductionDetails)
             {
+                Debug.LogFormat("NEIL getting production client details");
                 return await GetProductionClientDetails();
             }
             return new ClientConnectionDetails();
@@ -91,12 +91,9 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Common
                 return GetProductionServerConnectionDetails();
             }
 
-            if(mode == Mode.UseEditorDetails)
+            if(mode == Mode.UseEditorDetails || mode == Mode.UseProductionDetails) // Production details only works for the client part
             {
                 return new ServerConnectionDetails { token = serverToken, wsUrl = wsUrl, healthPort=7882 };
-            } else if(mode == Mode.UseProductionDetails)
-            {
-                return GetProductionServerConnectionDetails();
             }
 
             return new ServerConnectionDetails();
