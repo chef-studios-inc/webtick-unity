@@ -19,7 +19,7 @@ namespace WebTick.Livekit.Standalone
     {
         private string websocketUrl;
         private string token;
-        private NativeWebSocket.WebSocket websocket;
+        private WebTick.WebSocket.NativeWebSocket.WebSocket websocket;
 
         public delegate void OnJoinDelegate(object sender, LiveKit.Proto.JoinResponse response);
         public delegate void OnTrickleDelegate(object sender, LiveKit.Proto.TrickleRequest request);
@@ -98,7 +98,7 @@ namespace WebTick.Livekit.Standalone
         {
             var url = this.websocketUrl + "/rtc?access_token=" + token + "&sdk=js&protocol=9&version=1.9.2&auto_subscribe=1&adaptive_stream=0";
             Debug.LogFormat("[LIVEKIT SERVER WS] Connecting to livekit: {0}", url);
-            websocket = new NativeWebSocket.WebSocket(url);
+            websocket = new WebTick.WebSocket.NativeWebSocket.WebSocket(url);
 
             websocket.OnError += Websocket_OnError;
             websocket.OnOpen += Websocket_OnOpen;
@@ -109,7 +109,7 @@ namespace WebTick.Livekit.Standalone
             await websocket.Connect();
         }
 
-        private void Websocket_OnClose(NativeWebSocket.WebSocketCloseCode closeCode)
+        private void Websocket_OnClose(WebTick.WebSocket.NativeWebSocket.WebSocketCloseCode closeCode)
         {
             Debug.LogFormat("[LIVEKIT SIGNAL CLIENT] On Close: {0}", closeCode);
             websocket = null;
