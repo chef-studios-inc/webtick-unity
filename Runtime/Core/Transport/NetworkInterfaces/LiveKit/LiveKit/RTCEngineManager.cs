@@ -11,6 +11,7 @@ public static class RTCEngineManager
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Init()
     {
+        Debug.LogFormat("Resetting RTCEngineManager");
         engineLookup = new Dictionary<uint, RTCEngine>();
         engineID = 1;
     }
