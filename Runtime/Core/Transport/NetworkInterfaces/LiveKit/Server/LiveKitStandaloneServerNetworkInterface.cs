@@ -70,6 +70,11 @@ namespace WebTick.Transport
 
         public void Dispose()
         {
+            if(this.engineHandle != 0)
+            {
+                RTCEngineManager.CleanupEngine(engineHandle);
+            }
+            this.engineHandle = 0;
         }
 
         public int Initialize(ref NetworkSettings settings, ref int packetPadding)

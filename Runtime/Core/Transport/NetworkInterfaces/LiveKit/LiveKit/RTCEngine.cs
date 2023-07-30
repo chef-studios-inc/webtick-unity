@@ -72,6 +72,7 @@ namespace WebTick.Livekit.Standalone
             if (localPeerConnection != null)
             {
                 localPeerConnection.Close();
+                localPeerConnection.Dispose();
             }
             if (signalClient != null)
             {

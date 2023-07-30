@@ -72,7 +72,9 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client
             // Wait for client details and connect everything when we get them
             if(SystemAPI.HasSingleton<GetClientConnectionDetailsTaskTag>() && SystemAPI.HasSingleton<NetworkStreamDriver>())
             {
+                Debug.LogFormat("NEIL Waiting for client connection details");
                 var e = SystemAPI.GetSingletonEntity<GetClientConnectionDetailsTaskTag>();
+                ecb.DestroyEntity(e);
                 var task = EntityManager.GetComponentData<GetClientConnectionDetailsTask>(e);
                 if(!task.value.IsCompleted)
                 {
@@ -97,8 +99,8 @@ namespace WebTick.Core.Transport.NetworkInterfaces.LiveKit.Client
                 var endpoint = NetworkEndpoint.LoopbackIpv4.WithPort(1234);
                 nsd.Connect(EntityManager, endpoint);
 
-                ecb.DestroyEntity(e);
             }
+
             ecb.Playback(EntityManager);
             ecb.Dispose();
         }

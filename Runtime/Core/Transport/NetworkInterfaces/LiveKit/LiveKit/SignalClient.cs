@@ -84,13 +84,18 @@ namespace WebTick.Livekit.Standalone
                 return;
             }
             await websocket.Close();
+            websocket = null;
         }
 
         public IEnumerator UpdateTick()
         {
-            while(websocket != null) {
+            while (websocket != null)
+            {
                 yield return null;
-                websocket.DispatchMessageQueue();
+                if (websocket != null)
+                {
+                    websocket.DispatchMessageQueue();
+                }
             }
         }
 

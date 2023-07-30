@@ -8,6 +8,13 @@ public static class RTCEngineManager
     private static Dictionary<uint, RTCEngine> engineLookup = new Dictionary<uint, RTCEngine>();
     private static uint engineID = 1;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void Init()
+    {
+        engineLookup = new Dictionary<uint, RTCEngine>();
+        engineID = 1;
+    }
+
     public static bool ReceiveData(uint handle, out RTCEngine.Message msg)
     {
         var engine = engineLookup[handle];
@@ -53,6 +60,7 @@ public static class RTCEngineManager
 
     public static void CleanupEngine(uint handle)
     {
+        GameObject.Destroy(engineLookup[handle].gameObject);
         engineLookup.Remove(handle);
     }
 
